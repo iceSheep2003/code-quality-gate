@@ -39,7 +39,7 @@ function register(server, definition, action) {
 }
 async function beginTask(root, input) {
   const task = validateTask({ version: 1, ...input });
-  const manifest = `.veritygate/tasks/${task.id}.json`;
+  const manifest = `.code-quality-gate/tasks/${task.id}.json`;
   if (await readJson(root, manifest, { optional: true }))
     throw new Error(
       "Task already exists; preserve its original tests and budget",
@@ -64,16 +64,16 @@ const taskSchema = {
 };
 export function createMcpServer(root) {
   const server = new McpServer(
-    { name: "veritygate", version: "0.4.0" },
+    { name: "code-quality-gate", version: "0.4.0" },
     {
       instructions:
-        "For code changes: inspect quality checks, write acceptance tests first, begin a task, record real failing assertions with veritygate_red, implement and repeat veritygate_green using its reports, then call veritygate_gate before an authorized merge. Do not weaken tests, quality standards or evidence. Respect the user scope, stop requests and task budget. This server runs configured project tools and is not a sandbox.",
+        "For code changes: inspect quality checks, write acceptance tests first, begin a task, record real failing assertions with code_quality_gate_red, implement and repeat code_quality_gate_green using its reports, then call code_quality_gate_gate before an authorized merge. Do not weaken tests, quality standards or evidence. Respect the user scope, stop requests and task budget. This server runs configured project tools and is not a sandbox.",
     },
   );
   register(
     server,
     {
-      name: "veritygate_status",
+      name: "code_quality_gate_status",
       description:
         "Inspect checks, active task and last report; this is not a fresh merge decision",
       readOnly: true,
@@ -83,7 +83,7 @@ export function createMcpServer(root) {
   register(
     server,
     {
-      name: "veritygate_setup",
+      name: "code_quality_gate_setup",
       description:
         "Install managed agent instructions, discoverable skills and MCP configuration in this project",
     },
@@ -92,7 +92,7 @@ export function createMcpServer(root) {
   register(
     server,
     {
-      name: "veritygate_begin",
+      name: "code_quality_gate_begin",
       description:
         "Declare a test-first change after writing the tests; preserves a unique task and iteration budget",
       schema: taskSchema,
@@ -103,7 +103,7 @@ export function createMcpServer(root) {
   register(
     server,
     {
-      name: "veritygate_gate",
+      name: "code_quality_gate_gate",
       description:
         "Fresh merge gate: verify red/green evidence and unchanged current files, rerun all quality checks; canMerge is true only on success",
     },
@@ -112,7 +112,7 @@ export function createMcpServer(root) {
   register(
     server,
     {
-      name: "veritygate_audit",
+      name: "code_quality_gate_audit",
       description:
         "Run independent diagnostics and save Markdown/JSON reports; this does not replace red/green evidence",
     },
@@ -131,7 +131,7 @@ function registerPhases(server, root) {
     register(
       server,
       {
-        name: `veritygate_${phase}`,
+        name: `code_quality_gate_${phase}`,
         description:
           phase === "red"
             ? "Record failing acceptance assertions before implementing; freezing tests and quality standards"

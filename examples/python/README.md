@@ -3,7 +3,7 @@
 需要 Python 3；测试只用标准库。复制本目录到自己的项目，在该目录执行：
 
 ```sh
-veritygate audit > quality-report.md
+code-quality-gate audit > quality-report.md
 ```
 
 配置中的 `python3` 可以改成机器上真实的 Python 可执行文件名或绝对路径。

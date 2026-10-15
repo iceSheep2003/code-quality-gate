@@ -13,7 +13,7 @@ import { withWorkflowLock } from "../src/agent/lock.mjs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 const cli = resolve("src/cli.mjs");
-const manifest = ".veritygate/tasks/ADD.json";
+const manifest = ".code-quality-gate/tasks/ADD.json";
 const task = {
   version: 1,
   id: "ADD",
@@ -26,10 +26,10 @@ const task = {
   maxAttempts: 3,
 };
 async function project(fn, overrides = {}) {
-  const root = await mkdtemp(join(tmpdir(), "veritygate-agent-"));
+  const root = await mkdtemp(join(tmpdir(), "code-quality-gate-agent-"));
   try {
     await mkdir(join(root, "tests"));
-    await mkdir(join(root, ".veritygate/tasks"), { recursive: true });
+    await mkdir(join(root, ".code-quality-gate/tasks"), { recursive: true });
     await writeFile(
       join(root, manifest),
       JSON.stringify({ ...task, ...overrides }),
@@ -99,23 +99,34 @@ test("setup preserves user instructions/configuration and installs idempotent sk
     );
     const mcp = JSON.parse(await readFile(join(root, ".mcp.json"), "utf8"));
     assert.equal(mcp.mcpServers.existing.command, "existing-tool");
-    assert.equal(mcp.mcpServers.veritygate.command, process.execPath);
+    assert.equal(mcp.mcpServers["code-quality-gate"].command, process.execPath);
     assert.equal(
-      await readFile(join(root, ".agents/skills/veritygate/SKILL.md"), "utf8"),
-      await readFile(join(root, ".claude/skills/veritygate/SKILL.md"), "utf8"),
+      await readFile(
+        join(root, ".agents/skills/code-quality-gate/SKILL.md"),
+        "utf8",
+      ),
+      await readFile(
+        join(root, ".claude/skills/code-quality-gate/SKILL.md"),
+        "utf8",
+      ),
     );
   });
 });
 test("setup refuses to overwrite a customized skill", async () => {
   await project(async (root) => {
-    await mkdir(join(root, ".agents/skills/veritygate"), { recursive: true });
+    await mkdir(join(root, ".agents/skills/code-quality-gate"), {
+      recursive: true,
+    });
     await writeFile(
-      join(root, ".agents/skills/veritygate/SKILL.md"),
+      join(root, ".agents/skills/code-quality-gate/SKILL.md"),
       "My customized skill",
     );
     await assert.rejects(setupAgent(root), /customized skill/);
     assert.equal(
-      await readFile(join(root, ".agents/skills/veritygate/SKILL.md"), "utf8"),
+      await readFile(
+        join(root, ".agents/skills/code-quality-gate/SKILL.md"),
+        "utf8",
+      ),
       "My customized skill",
     );
   });
@@ -157,7 +168,9 @@ test("initially green tests and module loading failures cannot establish red", a
       "import './missing-module.mjs';",
     );
     assert.equal((await phase(root, "red")).passed, false);
-    await assert.rejects(readFile(join(root, ".veritygate/evidence/ADD.json")));
+    await assert.rejects(
+      readFile(join(root, ".code-quality-gate/evidence/ADD.json")),
+    );
   });
 });
 test("tests, adapters, requirement manifest and thresholds are frozen after red", async () => {
@@ -186,12 +199,15 @@ test("missing red and missing green evidence block completion; red cannot be sil
     assert.equal((await runGate({ root })).passed, false);
     assert.equal((await phase(root, "red")).passed, true);
     const evidence = await readFile(
-      join(root, ".veritygate/evidence/ADD.json"),
+      join(root, ".code-quality-gate/evidence/ADD.json"),
       "utf8",
     );
     assert.equal((await phase(root, "red")).passed, false);
     assert.equal(
-      await readFile(join(root, ".veritygate/evidence/ADD.json"), "utf8"),
+      await readFile(
+        join(root, ".code-quality-gate/evidence/ADD.json"),
+        "utf8",
+      ),
       evidence,
     );
     assert.equal((await runGate({ root })).passed, false);
@@ -265,13 +281,15 @@ test("MCP stdio provides real discovery and the complete red/green/gate workflow
       stderr: "pipe",
     });
     const client = new Client({
-      name: "veritygate-integration-test",
+      name: "code-quality-gate-integration-test",
       version: "1.0.0",
     });
     try {
       await client.connect(transport);
       const listed = await client.listTools();
-      assert.ok(listed.tools.some((tool) => tool.name === "veritygate_gate"));
+      assert.ok(
+        listed.tools.some((tool) => tool.name === "code_quality_gate_gate"),
+      );
       const call = async (name, args = {}) => {
         const result = await client.callTool(
           { name, arguments: args },
@@ -281,15 +299,21 @@ test("MCP stdio provides real discovery and the complete red/green/gate workflow
         return JSON.parse(result.content[0].text);
       };
       assert.equal(
-        (await call("veritygate_status")).configuredChecks.length,
+        (await call("code_quality_gate_status")).configuredChecks.length,
         1,
       );
-      assert.equal((await call("veritygate_red", { manifest })).passed, true);
-      await fix(root);
-      assert.equal((await call("veritygate_green", { manifest })).passed, true);
-      assert.equal((await call("veritygate_gate")).canMerge, true);
       assert.equal(
-        (await call("veritygate_red", { manifest: "../escape" })).passed,
+        (await call("code_quality_gate_red", { manifest })).passed,
+        true,
+      );
+      await fix(root);
+      assert.equal(
+        (await call("code_quality_gate_green", { manifest })).passed,
+        true,
+      );
+      assert.equal((await call("code_quality_gate_gate")).canMerge, true);
+      assert.equal(
+        (await call("code_quality_gate_red", { manifest: "../escape" })).passed,
         false,
       );
     } finally {

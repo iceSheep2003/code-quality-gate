@@ -1,6 +1,6 @@
 # Notices
 
-VerityGate was originally derived from MindLeap’s local `packages/backend-quality` tool. It contains no MindLeap business code. The project is distributed under MIT; third-party dependencies retain their own licenses.
+Code Quality Gate was originally derived from MindLeap’s local `packages/backend-quality` tool. It contains no MindLeap business code. The project is distributed under MIT; third-party dependencies retain their own licenses.
 
 本包动态使用下列 npm 依赖；安装依赖时其许可证随依赖包保留。
 

@@ -139,7 +139,7 @@ export async function runAudit(root, input = {}) {
   const summary = summarize(checks);
   return {
     schemaVersion: 1,
-    tool: { name: "veritygate", version: "0.4.0" },
+    tool: { name: "code-quality-gate", version: "0.4.0" },
     startedAt,
     passed: summary.blocking === 0,
     checks,

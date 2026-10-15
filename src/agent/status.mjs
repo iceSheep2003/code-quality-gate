@@ -2,10 +2,14 @@ import { readJson } from "../files.mjs";
 import { readConfig } from "../project.mjs";
 export async function agentStatus(root) {
   const config = await readConfig(root);
-  const latest = await readJson(root, ".quality/veritygate/latest.json", {
-    optional: true,
-  });
-  const active = await readJson(root, ".veritygate/active.json", {
+  const latest = await readJson(
+    root,
+    ".quality/code-quality-gate/latest.json",
+    {
+      optional: true,
+    },
+  );
+  const active = await readJson(root, ".code-quality-gate/active.json", {
     optional: true,
   });
   return {

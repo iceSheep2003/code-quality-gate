@@ -5,6 +5,6 @@ coverage/
 .quality/
 __pycache__/
 quality-report.*
-.veritygate/run.lock/
-.veritygate/.gitkeep
+.code-quality-gate/run.lock/
+.code-quality-gate/.gitkeep
 .mcp.json

@@ -13,9 +13,9 @@ jobs:
           cache: npm
       # 按项目语言，在此安装 Python/JDK/Go/Rust 及测试工具。
       - run: npm ci --ignore-scripts
-      - run: npx --no-install veritygate audit > quality-report.md
+      - run: npx --no-install code-quality-gate audit > quality-report.md
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: veritygate-report
+          name: code-quality-gate-report
           path: quality-report.md

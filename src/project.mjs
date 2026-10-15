@@ -166,7 +166,7 @@ export async function checkProject(root, requested = {}) {
     contracts = await checkContracts(root, config, changed);
   return {
     schemaVersion: 1,
-    tool: { name: "veritygate", version: "0.4.0" },
+    tool: { name: "code-quality-gate", version: "0.4.0" },
     ...result,
     passed: result.passed && contracts.length === 0,
     changedFiles: changed,

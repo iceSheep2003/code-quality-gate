@@ -17,7 +17,7 @@ export function failedAudit(rule, message) {
   };
 }
 export function workflowMarkdown(result) {
-  return `# VerityGate workflow\n\n**Phase:** ${result.phase}\n\n**Phase accepted:** ${result.passed ? "yes" : "no"}\n\n**Ready to merge:** ${result.canMerge ? "yes" : "no"}\n\n${result.message}\n\n${auditMarkdown(result.audit)}`;
+  return `# Code Quality Gate workflow\n\n**Phase:** ${result.phase}\n\n**Phase accepted:** ${result.passed ? "yes" : "no"}\n\n**Ready to merge:** ${result.canMerge ? "yes" : "no"}\n\n${result.message}\n\n${auditMarkdown(result.audit)}`;
 }
 export async function saveIteration(
   root,
@@ -25,7 +25,7 @@ export async function saveIteration(
   { phase, audit, accepted, message },
 ) {
   audit = decisionAudit(audit, accepted, message);
-  const prefix = `.quality/veritygate/${task.id}/${phase}-${randomUUID()}`;
+  const prefix = `.quality/code-quality-gate/${task.id}/${phase}-${randomUUID()}`;
   const result = {
     schemaVersion: 1,
     id: task.id,
@@ -39,8 +39,8 @@ export async function saveIteration(
   const markdown = workflowMarkdown(result);
   await writeText(root, result.report, markdown);
   await writeJson(root, `${prefix}.json`, result);
-  await writeText(root, ".quality/veritygate/latest.md", markdown);
-  await writeJson(root, ".quality/veritygate/latest.json", result);
+  await writeText(root, ".quality/code-quality-gate/latest.md", markdown);
+  await writeJson(root, ".quality/code-quality-gate/latest.json", result);
   return result;
 }
 export async function rejected(root, task, phase, message) {

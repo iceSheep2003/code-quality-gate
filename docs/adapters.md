@@ -78,7 +78,7 @@
 
 ## AI test-first task manifest
 
-Create a task through `veritygate_begin`, or write `.veritygate/tasks/FEATURE-001.json`:
+Create a task through `code_quality_gate_begin`, or write `.code-quality-gate/tasks/FEATURE-001.json`:
 
 ```json
 {
@@ -89,7 +89,7 @@ Create a task through `veritygate_begin`, or write `.veritygate/tasks/FEATURE-00
   "testFiles": ["tests/test_shipping.py"],
   "codeFiles": ["src/shipping.py"],
   "testChecks": ["acceptance"],
-  "protectedFiles": ["quality_adapter.py", ".veritygate/ci-setup.sh"],
+  "protectedFiles": ["quality_adapter.py", ".code-quality-gate/ci-setup.sh"],
   "maxAttempts": 12
 }
 ```
@@ -100,4 +100,4 @@ The JUnit parser exposes `assertionFailures`, `errors` and `loadingErrors` in ad
 
 The CLI saves both the expected red audit failure and whether it qualified as workflow evidence. Green runs every configured audit check, consumes an attempt and requires changed implementation, frozen acceptance inputs, and stable files during execution. The final gate reruns the suite; a stored green result alone does not grant readiness.
 
-`.veritygate/active.json` selects the task verified by the default final gate. Older task evidence is retained as history; it is not all revalidated against code changed by later tasks. Repository policy and trusted CI determine how task scope and historical evidence are reviewed.
+`.code-quality-gate/active.json` selects the task verified by the default final gate. Older task evidence is retained as history; it is not all revalidated against code changed by later tasks. Repository policy and trusted CI determine how task scope and historical evidence are reviewed.

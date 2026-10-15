@@ -17,7 +17,7 @@ export function toSarif(result) {
     version: "2.1.0",
     runs: [
       {
-        tool: { driver: { name: "veritygate", version: "0.4.0" } },
+        tool: { driver: { name: "code-quality-gate", version: "0.4.0" } },
         invocations: [
           {
             executionSuccessful: !result.violations?.some(

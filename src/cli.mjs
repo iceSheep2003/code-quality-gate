@@ -14,7 +14,7 @@ import { runAudit } from "./audit/engine.mjs";
 import { auditMarkdown, auditSarif } from "./audit/markdown.mjs";
 import { dispatchAgent } from "./agent/dispatch.mjs";
 import { workflowMarkdown } from "./agent/artifacts.mjs";
-const usage = `veritygate <setup|workflow|gate|status|mcp|audit|check|init|baseline|tdd|verify> [options]
+const usage = `code-quality-gate <setup|workflow|gate|status|mcp|audit|check|init|baseline|tdd|verify> [options]
   --root DIRECTORY       Project root (default: current directory)
   --config FILE          Relative JSON config (default: quality.config.json)
   --format FORMAT        audit/workflow/gate: markdown|json|sarif; others: text|json|sarif
@@ -216,7 +216,7 @@ try {
     );
   } else if (!["json", "sarif"].includes(format)) {
     console.error(formatReport(result, "text"));
-    console.error("Run veritygate --help for usage.");
+    console.error("Run code-quality-gate --help for usage.");
   } else console.log(formatReport(result, format));
   process.exitCode = 2;
 }

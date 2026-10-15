@@ -2,11 +2,11 @@
 
 ## 内置 JS/TS 静态检查
 
-拿到交付的 `veritygate-0.4.0.tgz` 后，在需要检查的项目根目录执行：
+拿到交付的 `code-quality-gate-0.4.0.tgz` 后，在需要检查的项目根目录执行：
 
 ```sh
-npm install --save-dev /实际路径/veritygate-0.4.0.tgz
-npx --no-install veritygate check
+npm install --save-dev /实际路径/code-quality-gate-0.4.0.tgz
+npx --no-install code-quality-gate check
 ```
 
 安装包本身不需要 MindLeap 源码、服务端、数据库、API 密钥或联网账户。首次安装会下载 npm 依赖；安装完成后检查可以离线运行。没有发布到 npm，不要把名称当成已存在的公共注册表包。
@@ -16,7 +16,7 @@ npx --no-install veritygate check
 正式接入建议显式限定生产代码：
 
 ```sh
-npx --no-install veritygate init
+npx --no-install code-quality-gate init
 ```
 
 `init` 在根目录生成 `quality.config.json`，不会覆盖已有文件。修改 `include` 为实际目录；默认生成的是 `src`。
@@ -57,10 +57,10 @@ npx --no-install veritygate init
 ## 报告与 CI
 
 ```sh
-npx --no-install veritygate check --json > quality-report.json
-npx --no-install veritygate check --format sarif > quality-report.sarif
-npx --no-install veritygate check --root /项目绝对路径 --config config/quality.json
-npx --no-install veritygate --help
+npx --no-install code-quality-gate check --json > quality-report.json
+npx --no-install code-quality-gate check --format sarif > quality-report.sarif
+npx --no-install code-quality-gate check --root /项目绝对路径 --config config/quality.json
+npx --no-install code-quality-gate --help
 ```
 
 支持 `--flag value` 和 `--flag=value`。命令放在参数前。
@@ -78,9 +78,9 @@ SARIF 2.1.0 可交给支持该格式的 CI/审查工具；已有基线问题仅�
 先查看当前报告，再明确记录历史问题：
 
 ```sh
-npx --no-install veritygate check --json
-npx --no-install veritygate baseline --accept-existing
-npx --no-install veritygate check
+npx --no-install code-quality-gate check --json
+npx --no-install code-quality-gate baseline --accept-existing
+npx --no-install code-quality-gate check
 ```
 
 基线不是修复证明。它按问题指纹和数量匹配；改过函数、新增问题、复制问题、语法错误不能借用旧豁免。基线会记录范围和策略；改变 include/exclude、依赖环开关或阈值会要求重新审查。不要在每次 CI 中自动刷新基线。
@@ -107,11 +107,11 @@ npx --no-install veritygate check
 ```
 
 ```sh
-npx --no-install veritygate tdd --change quality/changes/FEATURE-001.json --phase red
+npx --no-install code-quality-gate tdd --change quality/changes/FEATURE-001.json --phase red
 # 改实现，让相同测试通过
-npx --no-install veritygate tdd --change quality/changes/FEATURE-001.json --phase green
-npx --no-install veritygate verify --change quality/changes/FEATURE-001.json
-npx --no-install veritygate check
+npx --no-install code-quality-gate tdd --change quality/changes/FEATURE-001.json --phase green
+npx --no-install code-quality-gate verify --change quality/changes/FEATURE-001.json
+npx --no-install code-quality-gate check
 ```
 
 该可选功能使用 Node 内置测试运行器，支持 `.test.js/.test.mjs/.test.cjs`，不会自动适配 Jest/Vitest。red 需要断言失败，模块缺失、加载失败、原本通过、跳过或 todo 不能充当通过的阶段记录。green 会核对同一需求和测试，并拒绝运行期间代码/测试变化。每次执行最多 60 秒、输出最多 500KB。
@@ -123,7 +123,7 @@ npx --no-install veritygate check
 ## 编程接口
 
 ```js
-import { analyzeSource, evaluateReport, checkProject, resolveConfig, toSarif } from 'veritygate';
+import { analyzeSource, evaluateReport, checkProject, resolveConfig, toSarif } from 'code-quality-gate';
 const source = analyzeSource('export const sum=(a:number,b:number)=>a+b;', { filename:'src/sum.ts' });
 console.log(evaluateReport([source]));
 const project = await checkProject(process.cwd(), resolveConfig({ include:['src'] }));

@@ -1,4 +1,4 @@
-export const hostWorkflow = `name: VerityGate
+export const hostWorkflow = `name: Code Quality Gate
 on: [pull_request, workflow_dispatch]
 permissions:
   contents: read
@@ -10,16 +10,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm install --global --ignore-scripts veritygate@0.4.0
+      - run: npm install --global --ignore-scripts code-quality-gate@0.4.0
       - name: Prepare project toolchain
         run: |
-          if [ -f .veritygate/ci-setup.sh ]; then
-            sh .veritygate/ci-setup.sh
+          if [ -f .code-quality-gate/ci-setup.sh ]; then
+            sh .code-quality-gate/ci-setup.sh
           fi
-      - run: veritygate gate
+      - run: code-quality-gate gate
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: veritygate-report
-          path: .quality/veritygate/
+          name: code-quality-gate-report
+          path: .quality/code-quality-gate/
 `;

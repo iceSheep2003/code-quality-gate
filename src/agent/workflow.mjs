@@ -81,7 +81,7 @@ async function red(root, ctx) {
         report: result.report,
       },
     });
-    await writeJson(root, ".veritygate/active.json", {
+    await writeJson(root, ".code-quality-gate/active.json", {
       manifest: options.manifest,
       config: options.config,
     });
@@ -199,5 +199,5 @@ async function executeGate({ root, manifest, config }) {
 
 async function activeTask(root, manifest, config) {
   if (manifest) return { manifest, config: config || "quality.config.json" };
-  return readJson(root, ".veritygate/active.json", { optional: true });
+  return readJson(root, ".code-quality-gate/active.json", { optional: true });
 }

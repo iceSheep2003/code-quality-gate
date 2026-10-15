@@ -1,5 +1,5 @@
 {
-  "name": "veritygate",
+  "name": "code-quality-gate",
   "version": "0.4.0",
   "description": "Test-first quality gates for AI coding agents, with language-independent checks and Markdown reports",
   "type": "module",
@@ -9,7 +9,7 @@
   },
   "exports": "./src/index.mjs",
   "bin": {
-    "veritygate": "src/cli.mjs",
+    "code-quality-gate": "src/cli.mjs",
     "code-quality": "src/cli.mjs"
   },
   "files": [
@@ -45,11 +45,11 @@
   "author": "ice.Sheep",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iceSheep2003/veritygate.git"
+    "url": "git+https://github.com/iceSheep2003/code-quality-gate.git"
   },
-  "homepage": "https://github.com/iceSheep2003/veritygate#readme",
+  "homepage": "https://github.com/iceSheep2003/code-quality-gate#readme",
   "bugs": {
-    "url": "https://github.com/iceSheep2003/veritygate/issues"
+    "url": "https://github.com/iceSheep2003/code-quality-gate/issues"
   },
   "keywords": [
     "ai",

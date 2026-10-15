@@ -100,7 +100,7 @@ export function sameProtection(first, current) {
   );
 }
 export function recordPath(id) {
-  return `.veritygate/evidence/${id}.json`;
+  return `.code-quality-gate/evidence/${id}.json`;
 }
 
 function validateRequirements(requirements) {
