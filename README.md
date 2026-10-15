@@ -132,7 +132,7 @@ Coverage and mutation scores come from project tools. The package records each m
 
 ## Reports that keep the history
 
-Every audit, red, green and gate also saves **HTML automatically**. Open **`.quality/code-quality-gate/report.html`**: one file contains every task, iteration, measurement and recorded diagnostic. Each run updates this file; it does not create more HTML files. No server, internet connection or external chart library is needed.
+Every audit, red, green and gate also saves **HTML automatically**. Open **`.quality/code-quality-gate/report.html`**: one file contains every task, iteration, measurement and recorded diagnostic. Each run updates this file; it does not create more HTML files. The desktop interface uses a dark navy palette matching the project mark, with a light print view. No server, internet connection or external chart library is needed.
 
 The report includes per-task metric trends with each iteration's bounds, searchable iteration/metric/check tables, English/Chinese switching, and print/PDF styles. Missing measurements break the line. Measurements without thresholds are labelled `measured`. Built-in `cqg check -f html` also shows per-function JS/TS metrics.
 

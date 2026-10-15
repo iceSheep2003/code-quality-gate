@@ -132,7 +132,7 @@ MCP 提供 status、setup、begin、red、green、audit 和 gate 工具，名称
 
 ## 累计报告
 
-每次 audit、red、green 和 gate 都会**自动生成 HTML**。在浏览器打开 **`.quality/code-quality-gate/report.html`**，一个文件包含全部任务、历次指标、修改记录和已记录的检查详情。每轮更新同一个文件，不另建 HTML 文件。无需启动服务器、联网或下载图表库。
+每次 audit、red、green 和 gate 都会**自动生成 HTML**。在浏览器打开 **`.quality/code-quality-gate/report.html`**，一个文件包含全部任务、历次指标、修改记录和已记录的检查详情。每轮更新同一个文件，不另建 HTML 文件。界面面向桌面浏览器，采用与图标一致的深蓝灰配色，打印时切换浅色。无需启动服务器、联网或下载图表库。
 
 报告支持按任务查看指标趋势与当轮门槛，筛选任务、阶段、判定和修改说明，并提供中英文切换与打印 / PDF 样式。未测量项会断开曲线，未配置门槛的实测值标为 `measured`。内置的 `cqg check -f html` 还会展示 JS/TS 每个函数的静态指标。
 

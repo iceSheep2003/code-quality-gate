@@ -54,8 +54,8 @@ function overview(latest, entries) {
   const passed = latest.checks.filter(
     (check) => check.status === "passed",
   ).length;
-  return `<div class="overview"><div><p class="eyebrow">${text("Quality observation", "代码质量记录")} / #${latest.sequence}</p><h1>${escape(latest.task.title)}</h1><div class="identity mono">${escape(latest.task.id)} · ${escape(latest.timestamp)} · UTC</div><p class="intro">${escape(latest.note || latest.message)}</p>${workflow(latest)}</div>
-    <aside class="decision-panel ${status}"><p class="eyebrow">${text("Workflow decision", "工作流判定")}</p><div class="decision-heading">${headline(latest)}</div><div class="decision-grid"><div><small>${text("Underlying audit", "实际检测结果")}</small><span class="value ${latest.auditPassed ? "pass-text" : "fail-text"}">${latest.auditPassed ? "PASS" : "FAIL"}</span></div><div><small>${text("Merge readiness", "合并就绪")}</small><span class="value">${latest.canMerge ? "READY" : "NOT READY"}</span></div><div><small>${text("Checks passed / executed", "通过 / 执行检查数")}</small><span class="value mono">${passed} / ${latest.checks.length}</span></div><div><small>${text("Recorded observations", "已记录轮次")}</small><span class="value mono">${entries.length}</span></div></div></aside></div>`;
+  return `<div class="overview"><div><h1>${text("Quality report", "代码质量报告")}</h1><p class="report-task">${escape(latest.task.title)} <span class="mono">${escape(latest.task.id)}</span></p><p class="identity mono">${escape(latest.timestamp)} · UTC · #${latest.sequence}</p><p class="intro">${escape(latest.note || latest.message)}</p>${workflow(latest)}</div>
+    <aside class="decision-panel ${status}"><div class="decision-heading">${headline(latest)}</div><div class="decision-grid"><div><small>${text("Underlying audit", "实际检测")}</small><span class="value ${latest.auditPassed ? "pass-text" : "fail-text"}">${latest.auditPassed ? "PASS" : "FAIL"}</span></div><div><small>${text("Merge readiness", "合并状态")}</small><span class="value">${latest.canMerge ? "READY" : "NOT READY"}</span></div><div><small>${text("Checks passed", "检查通过")}</small><span class="value mono">${passed} / ${latest.checks.length}</span></div><div><small>${text("Observations", "检测轮次")}</small><span class="value mono">${entries.length}</span></div></div></aside></div>`;
 }
 function workflow(latest) {
   const labels = [
@@ -76,7 +76,10 @@ function navigation() {
     ["checks", "Check execution", "检查执行"],
     ["records", "Full records", "完整记录"],
   ]
-    .map(([id, en, zh]) => `<a href="#${id}">${text(en, zh)}</a>`)
+    .map(
+      ([id, en, zh]) =>
+        `<a href="#${id}" ${id === "trends" ? 'aria-current="location"' : ""}>${text(en, zh)}</a>`,
+    )
     .join("")}</nav>`;
 }
 function body(entries, result) {
@@ -86,7 +89,7 @@ function body(entries, result) {
     "Charts group by task. Missing/error/not-run observations break the line; bounds belong to each iteration. Phase, decision and search filters apply to tables; task also filters charts.",
     "图表按任务分组；缺失、错误和未运行会断开曲线，门槛按当轮展示。阶段、判定与搜索用于筛选表格；任务筛选同时作用于图表。",
   );
-  const count = `<p class="filter-count" aria-live="polite"><span id="visible-count">${entries.length}</span> ${text("visible iterations", "条可见迭代")}</p>`;
+  const count = `<p class="filter-count" aria-live="polite"><span id="visible-count">${entries.length}</span> ${text("visible iterations", "条可见迭代")}</p><p id="no-matches" class="empty" hidden>${text("No matching observations. Reset filters to view all records.", "没有匹配记录，可重置筛选查看全部数据。")}</p>`;
   const details = result
     ? section(
         "details",
@@ -102,5 +105,5 @@ export function reportHtml({ entries, result } = {}) {
   const csp = `default-src 'none'; script-src 'sha256-${digest(script)}'; style-src 'sha256-${digest(css)}'; base-uri 'none'; form-action 'none'`;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="${escape(csp)}"><title>Code Quality Gate · ${escape(observations.at(-1)?.task.id || "Report")}</title><style>${css}</style></head>
-<body><header><div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 5H5v22h4M23 5h4v22h-4" fill="none" stroke="#d3e4f2" stroke-width="2"/><path d="m11 16 4 5 8-11" fill="none" stroke="#75d9b4" stroke-width="2.5"/></svg>Code Quality Gate<span class="edition">v${escape(tool.version)} / HTML report</span></div><div class="header-actions"><button id="language" type="button">中文 / EN</button><button id="print" type="button">${text("Print / PDF", "打印 / PDF")}</button></div></header><main><noscript><p class="noscript">All results are readable without JavaScript. Enable it for filters, language switching and printing controls.</p></noscript>${body(observations, result)}<footer><p>${text("Generated from executed checks and the recorded observation ledger. Notes describe intent; tools supply the numbers. A successful red phase can contain a failing audit. Only a fresh accepted gate grants merge readiness.", "报告来自实际检测与历史记录。说明描述修改意图，数值来自工具。red 被接受时底层测试仍可失败；只有最新门禁通过才代表可合并。")}</p><p>${text("This file works offline. Metrics are not a proof that every requirement is tested. Reopen the generated file to see a later run; this page does not auto-refresh.", "此文件支持离线查看。指标不能证明所有需求都已测试。后续运行后需重新打开生成的文件，页面不会自动刷新。")}</p></footer></main><script>${script}</script></body></html>\n`;
+<body><a class="skip-link" href="#report-main">Skip to report / 跳至报告</a><header><div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 5H5v22h4M23 5h4v22h-4" fill="none" stroke="#363b39" stroke-width="2"/><path d="m11 16 4 5 8-11" fill="none" stroke="#386d58" stroke-width="2.5"/></svg>cqg<span class="edition">Code Quality Gate · v${escape(tool.version)}</span></div><div class="header-actions"><button id="language" type="button">中文 / EN</button><button id="print" type="button">${text("Print / PDF", "打印 / PDF")}</button></div></header><main id="report-main"><noscript><p class="noscript">All results are readable without JavaScript. Enable it for filters, language switching and printing controls.</p></noscript>${body(observations, result)}<footer><p>${text("Generated from executed checks and the recorded observation ledger. Notes describe intent; tools supply the numbers. A successful red phase can contain a failing audit. Only a fresh accepted gate grants merge readiness.", "报告来自实际检测与历史记录。说明描述修改意图，数值来自工具。red 被接受时底层测试仍可失败；只有最新门禁通过才代表可合并。")}</p><p>${text("This file works offline. Metrics are not a proof that every requirement is tested. Reopen the generated file to see a later run; this page does not auto-refresh.", "此文件支持离线查看。指标不能证明所有需求都已测试。后续运行后需重新打开生成的文件，页面不会自动刷新。")}</p></footer></main><script>${script}</script></body></html>\n`;
 }
