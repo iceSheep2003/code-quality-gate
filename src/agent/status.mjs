@@ -17,6 +17,10 @@ export async function agentStatus(root) {
     passed: true,
     active,
     latest,
+    history: {
+      markdown: ".quality/code-quality-gate/history.md",
+      jsonl: ".quality/code-quality-gate/history.jsonl",
+    },
     configuredChecks: (config.audit?.checks || []).map((check) => ({
       id: check.id,
       title: check.title,

@@ -116,7 +116,7 @@ test("dependency cycles include imports and re-exports; dynamic paths are outsid
 test("SARIF reports source locations and help/version/init work independently", async () => {
   await project(async (root) => {
     assert.equal(run(root, "--help").status, 0);
-    assert.match(run(root, "--version").stdout, /0\.4\.0/);
+    assert.match(run(root, "--version").stdout, /0\.5\.0/);
     assert.equal(run(root, "init").status, 0);
     assert.equal(run(root, "init").status, 2);
     await writeFile(

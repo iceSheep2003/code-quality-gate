@@ -1,3 +1,4 @@
+import { validateHistoryConfig } from "./history-config.mjs";
 import { safeRelative } from "../files.mjs";
 
 function object(value, keys, label) {
@@ -93,7 +94,7 @@ function validateCommand(command) {
 export function validateAudit(input = {}) {
   object(
     input,
-    ["checks", "timeoutMs", "maxOutputBytes", "maxReportBytes"],
+    ["checks", "timeoutMs", "maxOutputBytes", "maxReportBytes", "history"],
     "audit",
   );
   const checks = input.checks ?? [];
@@ -102,6 +103,7 @@ export function validateAudit(input = {}) {
   if (new Set(checks.map((check) => check.id)).size !== checks.length)
     throw new Error("audit check ids must be unique");
   executionLimits(input);
+  validateHistoryConfig(input.history, checks);
   return {
     timeoutMs: 60000,
     maxOutputBytes: 5000000,

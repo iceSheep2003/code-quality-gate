@@ -1,3 +1,4 @@
+import { tool } from "./version.mjs";
 function violationText(v) {
   return `${v.filename || "<gate>"}:${v.line || 1}:${v.column || 1} ${v.rule || v.metric} ${v.message || `${v.actual} exceeds ${v.limit}`}`;
 }
@@ -17,7 +18,7 @@ export function toSarif(result) {
     version: "2.1.0",
     runs: [
       {
-        tool: { driver: { name: "code-quality-gate", version: "0.4.0" } },
+        tool: { driver: tool },
         invocations: [
           {
             executionSuccessful: !result.violations?.some(

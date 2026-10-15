@@ -5,7 +5,7 @@
 Code Quality Gate is a Node CLI with a `bin` entry. Publish it to npm once and users can install it or execute it through npx. npx is an npm package runner, not a separate registry.
 
 ```sh
-npm install --save-dev code-quality-gate@0.4.0
+npm install --save-dev code-quality-gate@0.5.0
 npx code-quality-gate setup
 npx code-quality-gate audit
 ```
@@ -13,7 +13,7 @@ npx code-quality-gate audit
 For a one-off execution after publication:
 
 ```sh
-npx --yes code-quality-gate@0.4.0 audit --root /path/to/project
+npx --yes code-quality-gate@0.5.0 audit --root /path/to/project
 ```
 
 The package is currently prepared for publication. npm commands above become available after an actual successful registry publish; an available name is not a reservation. `code-quality` remains an executable alias for earlier local consumers.
@@ -43,20 +43,20 @@ The package name, GitHub repository links, MIT license, CLI entry and publicatio
 
 The workflow has `id-token: write`, which the registry needs for OIDC. No long-lived publish token is required. npm trusted publishing requires npm 11.5.1+ and Node 22.14.0+; the workflow uses Node 24 with an explicit npm minimum check. Registry ownership and trusted-publisher setup remain account operations.
 
-If using a private GitHub repository, check npm's current visibility/provenance rules before enabling attestations. This workflow omits `--provenance` so a private source repository is not represented as having public source provenance.
+The repository is public. The workflow publishes with provenance so consumers can verify the source workflow after the npm trusted publisher is configured.
 
 ## GitHub source and release archives
 
 Authenticated users can install the tagged source before npm publication:
 
 ```sh
-npm install --save-dev github:iceSheep2003/code-quality-gate#v0.4.0
+npm install --save-dev github:iceSheep2003/code-quality-gate#v0.5.0
 ```
 
-A private repository requires GitHub authentication. A `.tgz` generated with `npm pack` can also be installed directly:
+The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
 
 ```sh
-npm install --save-dev ./code-quality-gate-0.4.0.tgz
+npm install --save-dev ./code-quality-gate-0.5.0.tgz
 ```
 
 ## pip / pipx / uv

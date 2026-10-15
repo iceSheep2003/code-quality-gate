@@ -1,3 +1,4 @@
+import { historySpecification } from "../audit/history-metrics.mjs";
 import { runAudit } from "../audit/engine.mjs";
 import { readConfig } from "../project.mjs";
 import { hash } from "../ast.mjs";
@@ -59,11 +60,14 @@ async function red(root, ctx) {
   const audit = await runAudit(root, {
     ...config.audit,
     checks: acceptanceChecks(task, config),
+    history: undefined,
   });
+  audit.history = historySpecification(config.audit);
   const after = await snapshot(root, task, options);
   const accepted = isRealRed(audit) && hash(current) === hash(after);
   const result = await saveIteration(root, task, {
     phase: "red",
+    note: ctx.note,
     audit: audit,
     accepted: accepted,
     message: accepted
@@ -122,6 +126,7 @@ async function green(root, ctx) {
     hash(current.code) !== hash(evidence.red.snapshot.code);
   const result = await saveIteration(root, task, {
     phase: "green",
+    note: ctx.note,
     audit: audit,
     accepted: accepted,
     message: accepted
@@ -147,16 +152,18 @@ async function executeWorkflow({
   manifest,
   phase,
   config = "quality.config.json",
+  note,
 }) {
   if (!["red", "green"].includes(phase))
     throw new Error("Workflow phase must be red or green");
   const ctx = await context(root, manifest, config);
+  ctx.note = note;
   return phase === "red" ? red(root, ctx) : green(root, ctx);
 }
 export async function runGate(options) {
   return withWorkflowLock(options.root, () => executeGate(options));
 }
-async function executeGate({ root, manifest, config }) {
+async function executeGate({ root, manifest, config, note }) {
   const active = await activeTask(root, manifest, config);
   if (!active)
     return rejected(
@@ -189,6 +196,7 @@ async function executeGate({ root, manifest, config }) {
   const accepted = audit.passed && hash(current) === hash(after);
   return saveIteration(root, task, {
     phase: "gate",
+    note,
     audit: audit,
     accepted: accepted,
     message: accepted

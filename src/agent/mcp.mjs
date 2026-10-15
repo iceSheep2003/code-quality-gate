@@ -1,14 +1,13 @@
+import { tool } from "../version.mjs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as z from "zod/v4";
 import { readJson, writeJson } from "../files.mjs";
-import { readConfig } from "../project.mjs";
-import { runAudit } from "../audit/engine.mjs";
+import { runProjectAudit } from "../audit/project-audit.mjs";
 import { runWorkflow, runGate } from "./workflow.mjs";
 import { setupAgent } from "./setup.mjs";
 import { agentStatus } from "./status.mjs";
 import { validateTask } from "./contract.mjs";
-import { saveIteration } from "./artifacts.mjs";
 import { withWorkflowLock } from "./lock.mjs";
 
 function response(value) {
@@ -63,13 +62,10 @@ const taskSchema = {
   maxAttempts: z.number().int().min(1).max(100).optional(),
 };
 export function createMcpServer(root) {
-  const server = new McpServer(
-    { name: "code-quality-gate", version: "0.4.0" },
-    {
-      instructions:
-        "For code changes: inspect quality checks, write acceptance tests first, begin a task, record real failing assertions with code_quality_gate_red, implement and repeat code_quality_gate_green using its reports, then call code_quality_gate_gate before an authorized merge. Do not weaken tests, quality standards or evidence. Respect the user scope, stop requests and task budget. This server runs configured project tools and is not a sandbox.",
-    },
-  );
+  const server = new McpServer(tool, {
+    instructions:
+      "For code changes: inspect quality checks, write acceptance tests first, begin a task, record real failing assertions with code_quality_gate_red, implement and repeat code_quality_gate_green using its reports, then call code_quality_gate_gate before an authorized merge. Do not weaken tests, quality standards or evidence. Respect the user scope, stop requests and task budget. This server runs configured project tools and is not a sandbox.",
+  });
   register(
     server,
     {
@@ -106,17 +102,19 @@ export function createMcpServer(root) {
       name: "code_quality_gate_gate",
       description:
         "Fresh merge gate: verify red/green evidence and unchanged current files, rerun all quality checks; canMerge is true only on success",
+      schema: { note: z.string().max(1000).optional() },
     },
-    () => runGate({ root }),
+    (args) => runGate({ root, note: args.note }),
   );
   register(
     server,
     {
       name: "code_quality_gate_audit",
       description:
-        "Run independent diagnostics and save Markdown/JSON reports; this does not replace red/green evidence",
+        "Run independent diagnostics and append measured metrics to the iteration history; this does not replace red/green evidence",
+      schema: { note: z.string().max(1000).optional() },
     },
-    () => withWorkflowLock(root, () => independentAudit(root)),
+    (args) => runProjectAudit(root, { note: args.note }),
   );
   return server;
 }
@@ -136,23 +134,9 @@ function registerPhases(server, root) {
           phase === "red"
             ? "Record failing acceptance assertions before implementing; freezing tests and quality standards"
             : "Audit the implementation without changing frozen tests or standards; repeat using the generated report until passed or budget exhausted",
-        schema: { manifest: z.string() },
+        schema: { manifest: z.string(), note: z.string().max(1000).optional() },
       },
-      (args) => runWorkflow({ root, manifest: args.manifest, phase }),
+      (args) =>
+        runWorkflow({ root, manifest: args.manifest, phase, note: args.note }),
     );
-}
-
-async function independentAudit(root) {
-  const config = await readConfig(root);
-  const audit = await runAudit(root, config.audit);
-  return saveIteration(
-    root,
-    { id: "diagnostics" },
-    {
-      phase: "audit",
-      audit,
-      accepted: audit.passed,
-      message: "Independent audit; run the final gate before merging",
-    },
-  );
 }

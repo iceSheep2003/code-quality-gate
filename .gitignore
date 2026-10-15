@@ -8,3 +8,4 @@ quality-report.*
 .code-quality-gate/run.lock/
 .code-quality-gate/.gitkeep
 .mcp.json
+.code-quality-gate/history.lock/

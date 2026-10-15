@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { tool } from "./version.mjs";
 import { resolve } from "node:path";
 import { writeFile } from "node:fs/promises";
 import {
@@ -10,7 +11,7 @@ import {
 import { recordPhase, verifyEvidence } from "./tdd.mjs";
 import { writeJson, within, safeRelative } from "./files.mjs";
 import { formatReport } from "./reporters.mjs";
-import { runAudit } from "./audit/engine.mjs";
+import { runProjectAudit } from "./audit/project-audit.mjs";
 import { auditMarkdown, auditSarif } from "./audit/markdown.mjs";
 import { dispatchAgent } from "./agent/dispatch.mjs";
 import { workflowMarkdown } from "./agent/artifacts.mjs";
@@ -19,6 +20,7 @@ const usage = `code-quality-gate <setup|workflow|gate|status|mcp|audit|check|ini
   --config FILE          Relative JSON config (default: quality.config.json)
   --format FORMAT        audit/workflow/gate: markdown|json|sarif; others: text|json|sarif
   --json                 Alias for --format json
+  --note TEXT            Record an implementation-change note (audit/workflow/gate)
   --accept-existing      Explicitly record current findings as legacy (baseline)
   --change FILE          Task/contract (workflow/gate/tdd/verify)
   --phase red|green|baseline  Evidence phase (workflow: red|green; tdd: red|green|baseline)
@@ -28,12 +30,12 @@ check does not execute project code. audit runs configured tools; tdd runs Node 
 Exit codes: 0 passed, 1 findings/evidence failed, 2 configuration or access error.`;
 const commandFlags = {
   setup: ["root", "format"],
-  workflow: ["root", "config", "manifest", "phase", "format"],
-  gate: ["root", "config", "manifest", "format"],
+  workflow: ["root", "config", "manifest", "phase", "format", "note"],
+  gate: ["root", "config", "manifest", "format", "note"],
   status: ["root", "format"],
   mcp: ["root"],
   check: ["root", "config", "format"],
-  audit: ["root", "config", "format"],
+  audit: ["root", "config", "format", "note"],
   init: ["root", "config", "format"],
   baseline: ["root", "config", "format", "acceptExisting"],
   tdd: ["root", "manifest", "phase", "format"],
@@ -45,6 +47,7 @@ const valued = {
   "--format": "format",
   "--change": "manifest",
   "--phase": "phase",
+  "--note": "note",
 };
 function parseFlag(argv, index, result, given) {
   const [arg, ...rest] = argv[index].split("="),
@@ -72,11 +75,7 @@ function validateOptions(result, given) {
     throw new Error("Unknown command: " + result.command);
   if (given.some((flag) => !commandFlags[result.command].includes(flag)))
     throw new Error("Flag is not supported by " + result.command);
-  const formats = ["audit", "workflow", "gate"].includes(result.command)
-    ? ["markdown", "json", "sarif"]
-    : ["text", "json", "sarif"];
-  if (!formats.includes(result.format))
-    throw new Error(`Format must be ${formats.join(", ")}`);
+  validateFormat(result);
   if (
     ["tdd", "verify", "workflow"].includes(result.command) &&
     !result.manifest
@@ -148,10 +147,7 @@ async function dispatch(opts) {
     return dispatchAgent(root, opts);
   if (opts.command === "check")
     return checkProject(root, await loadConfig(root, opts));
-  if (opts.command === "audit") {
-    const config = await loadConfig(root, opts);
-    return runAudit(root, config.audit || {});
-  }
+  if (opts.command === "audit") return runProjectAudit(root, opts);
   if (opts.command === "baseline") return baseline(root, opts);
   if (opts.command === "init") return init(root, opts);
   if (opts.command === "tdd")
@@ -169,7 +165,7 @@ let format = argv.includes("--json")
 try {
   if (argv.some((a) => ["--help", "-h"].includes(a))) console.log(usage);
   else if (argv.some((a) => ["--version", "-v"].includes(a)))
-    console.log("0.4.0");
+    console.log(tool.version);
   else {
     const opts = options(argv);
     format = opts.format;
@@ -219,4 +215,14 @@ try {
     console.error("Run code-quality-gate --help for usage.");
   } else console.log(formatReport(result, format));
   process.exitCode = 2;
+}
+
+function validateFormat(result) {
+  if (result.note?.length > 1000)
+    throw new Error("--note must be at most 1000 characters");
+  const formats = ["audit", "workflow", "gate"].includes(result.command)
+    ? ["markdown", "json", "sarif"]
+    : ["text", "json", "sarif"];
+  if (!formats.includes(result.format))
+    throw new Error(`Format must be ${formats.join(", ")}`);
 }

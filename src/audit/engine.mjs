@@ -1,3 +1,5 @@
+import { tool } from "../version.mjs";
+import { historySpecification } from "./history-metrics.mjs";
 import { runProcess } from "./process.mjs";
 import { validateAudit } from "./config.mjs";
 import { numeric, prepareReport, readReport } from "./reports.mjs";
@@ -89,6 +91,7 @@ async function runCheck(root, check, config) {
     title: check.title,
     required: check.required !== false,
     thresholds: check.metrics || [],
+    reportFormat: check.format,
   };
   try {
     return {
@@ -139,10 +142,11 @@ export async function runAudit(root, input = {}) {
   const summary = summarize(checks);
   return {
     schemaVersion: 1,
-    tool: { name: "code-quality-gate", version: "0.4.0" },
+    tool,
     startedAt,
     passed: summary.blocking === 0,
     checks,
     summary,
+    history: historySpecification(config),
   };
 }

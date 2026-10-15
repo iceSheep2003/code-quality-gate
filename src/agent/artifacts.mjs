@@ -1,3 +1,4 @@
+import { recordHistory } from "../audit/history.mjs";
 import { randomUUID } from "node:crypto";
 import { auditMarkdown } from "../audit/markdown.mjs";
 import { writeJson, writeText } from "../files.mjs";
@@ -17,12 +18,12 @@ export function failedAudit(rule, message) {
   };
 }
 export function workflowMarkdown(result) {
-  return `# Code Quality Gate workflow\n\n**Phase:** ${result.phase}\n\n**Phase accepted:** ${result.passed ? "yes" : "no"}\n\n**Ready to merge:** ${result.canMerge ? "yes" : "no"}\n\n${result.message}\n\n${auditMarkdown(result.audit)}`;
+  return `# Code Quality Gate workflow\n\n**Phase:** ${result.phase}\n\n**Phase accepted:** ${result.passed ? "yes" : "no"}\n\n**Ready to merge:** ${result.canMerge ? "yes" : "no"}\n\n${result.message}\n\n**Iteration history:** ${result.history?.markdown || "not recorded"}\n\n${auditMarkdown(result.audit)}`;
 }
 export async function saveIteration(
   root,
   task,
-  { phase, audit, accepted, message },
+  { phase, audit, accepted, message, note },
 ) {
   audit = decisionAudit(audit, accepted, message);
   const prefix = `.quality/code-quality-gate/${task.id}/${phase}-${randomUUID()}`;
@@ -36,6 +37,14 @@ export async function saveIteration(
     report: `${prefix}.md`,
     audit,
   };
+  result.history = await recordHistory(root, {
+    task,
+    phase,
+    audit,
+    accepted,
+    message,
+    note,
+  });
   const markdown = workflowMarkdown(result);
   await writeText(root, result.report, markdown);
   await writeJson(root, `${prefix}.json`, result);

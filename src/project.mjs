@@ -1,3 +1,4 @@
+import { tool } from "./version.mjs";
 import { validateAudit } from "./audit/config.mjs";
 import { readdir } from "node:fs/promises";
 import { analyzeSource } from "./analyzer.mjs";
@@ -166,7 +167,7 @@ export async function checkProject(root, requested = {}) {
     contracts = await checkContracts(root, config, changed);
   return {
     schemaVersion: 1,
-    tool: { name: "code-quality-gate", version: "0.4.0" },
+    tool,
     ...result,
     passed: result.passed && contracts.length === 0,
     changedFiles: changed,

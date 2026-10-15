@@ -148,6 +148,21 @@ test("real assertions establish red, failed green reports diagnostics, fixed gre
     const gate = await runGate({ root });
     assert.equal(gate.passed, true, JSON.stringify(gate));
     assert.equal(gate.canMerge, true);
+    const history = (await readFile(join(root, gate.history.jsonl), "utf8"))
+      .trim()
+      .split("\n")
+      .map(JSON.parse);
+    assert.deepEqual(
+      history.map((entry) => entry.phase),
+      ["red", "green", "green", "gate"],
+    );
+    assert.equal(history[0].auditPassed, false);
+    assert.equal(history[0].accepted, true);
+    assert.equal(
+      history[2].metrics.find((metric) => metric.path === "successRate").actual,
+      100,
+    );
+    assert.equal(history[3].source.changedFiles.length, 0);
     assert.match(
       await readFile(join(root, gate.report), "utf8"),
       /Ready to merge:\*\* yes/,
@@ -308,10 +323,22 @@ test("MCP stdio provides real discovery and the complete red/green/gate workflow
       );
       await fix(root);
       assert.equal(
-        (await call("code_quality_gate_green", { manifest })).passed,
+        (
+          await call("code_quality_gate_green", {
+            manifest,
+            note: "Implement addition",
+          })
+        ).passed,
         true,
       );
-      assert.equal((await call("code_quality_gate_gate")).canMerge, true);
+      const gate = await call("code_quality_gate_gate");
+      assert.equal(gate.canMerge, true);
+      const history = (await readFile(join(root, gate.history.jsonl), "utf8"))
+        .trim()
+        .split("\n")
+        .map(JSON.parse);
+      assert.equal(history[1].note, "Implement addition");
+      assert.equal(history.length, 3);
       assert.equal(
         (await call("code_quality_gate_red", { manifest: "../escape" })).passed,
         false,
@@ -319,5 +346,34 @@ test("MCP stdio provides real discovery and the complete red/green/gate workflow
     } finally {
       await client.close();
     }
+  });
+});
+
+test("configured cross-check history columns survive a red run that only executes acceptance tests", async () => {
+  await project(async (root) => {
+    const path = join(root, "quality.config.json");
+    const config = JSON.parse(await readFile(path, "utf8"));
+    config.audit.checks.push({
+      id: "coverage",
+      title: "Coverage",
+      command: ["node", "-e", "process.exit(0)"],
+      metrics: [],
+    });
+    config.audit.history = {
+      metrics: [
+        { check: "acceptance", path: "successRate", label: "Test success (%)" },
+        { check: "coverage", path: "lines", label: "Line coverage (%)" },
+      ],
+    };
+    await writeFile(path, JSON.stringify(config));
+    const result = await phase(root, "red");
+    assert.equal(result.passed, true);
+    const entry = JSON.parse(
+      (await readFile(join(root, result.history.jsonl), "utf8")).trim(),
+    );
+    assert.equal(
+      entry.metrics.find((metric) => metric.check === "coverage").status,
+      "not-run",
+    );
   });
 });

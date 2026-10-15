@@ -23,3 +23,6 @@ export { setupAgent } from "./agent/setup.mjs";
 export { runWorkflow, runGate } from "./agent/workflow.mjs";
 export { agentStatus } from "./agent/status.mjs";
 export { validateTask } from "./agent/contract.mjs";
+
+export { runProjectAudit } from "./audit/project-audit.mjs";
+export { recordHistory } from "./audit/history.mjs";

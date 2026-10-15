@@ -9,10 +9,16 @@ export async function dispatchAgent(root, opts) {
       root,
       manifest: opts.manifest,
       phase: opts.phase,
+      note: opts.note,
       config: opts.config,
     });
   if (opts.command === "gate")
-    return runGate({ root, manifest: opts.manifest, config: opts.config });
+    return runGate({
+      root,
+      manifest: opts.manifest,
+      config: opts.config,
+      note: opts.note,
+    });
   const { serveMcp } = await import("./mcp.mjs");
   await serveMcp(root);
   return null;

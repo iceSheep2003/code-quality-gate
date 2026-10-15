@@ -403,3 +403,25 @@ test("CLI audits a non-JS project and emits Markdown by default, JSON and SARIF 
     assert.equal(JSON.parse(runCli(root, "--json").stdout).passed, false);
   });
 });
+
+test("CLI audit appends an iteration history and records change notes", async () => {
+  await project(async (root) => {
+    await writeFile(
+      join(root, "quality.config.json"),
+      JSON.stringify({ audit: { checks: [check()] } }),
+    );
+    const first = runCli(root, "--note", "First audit", "--json");
+    assert.equal(first.status, 0);
+    const next = runCli(root, "--note", "Second audit", "--json");
+    assert.equal(next.status, 0);
+    const value = JSON.parse(next.stdout);
+    const entries = (await readFile(join(root, value.history.jsonl), "utf8"))
+      .trim()
+      .split("\n")
+      .map(JSON.parse);
+    assert.deepEqual(
+      entries.map((entry) => entry.note),
+      ["First audit", "Second audit"],
+    );
+  });
+});

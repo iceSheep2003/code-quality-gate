@@ -2,10 +2,10 @@
 
 ## 内置 JS/TS 静态检查
 
-拿到交付的 `code-quality-gate-0.4.0.tgz` 后，在需要检查的项目根目录执行：
+拿到交付的 `code-quality-gate-0.5.0.tgz` 后，在需要检查的项目根目录执行：
 
 ```sh
-npm install --save-dev /实际路径/code-quality-gate-0.4.0.tgz
+npm install --save-dev /实际路径/code-quality-gate-0.5.0.tgz
 npx --no-install code-quality-gate check
 ```
 

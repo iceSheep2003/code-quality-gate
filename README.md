@@ -11,7 +11,7 @@ Code Quality Gate gives coding agents a repeatable acceptance workflow: write te
 - **Test-first evidence.** Records failing JUnit assertions before accepting a green implementation. Already-passing tests, skipped tests, missing reports and known loading failures do not establish red.
 - **Frozen acceptance criteria.** Hashes the task, tests, configured adapters and quality configuration after red. Changes to them block green.
 - **Configurable gates.** Checks test counts, coverage, mutation scores, duplication and any other numeric metric exposed by a project tool.
-- **Reports for every iteration.** Writes Markdown and JSON, including actual values, thresholds and failure details. SARIF is also available through the CLI.
+- **Measured iteration history.** Appends code fingerprints, changed files, actual metrics, policy bounds and agent notes to a durable observation log, then regenerates Markdown comparison tables. Earlier measurements are preserved.
 - **Agent integration.** Ships discoverable skills, managed project instructions, a stdio MCP server and a GitHub Actions gate template.
 
 The package coordinates tests and tools. The connected coding agent writes and repairs the implementation. It does not bundle an AI model or infer complete test coverage from a requirement.
@@ -20,17 +20,17 @@ The package coordinates tests and tools. The connected coding agent writes and r
 
 Requires **Node.js 22.13+**, plus the toolchain used by the project being tested.
 
-Version 0.4.0 is prepared for npm publication. Until it is published, install the tagged GitHub source or a release tarball; a private repository requires access:
+Version 0.5.0 is prepared for npm publication. Until it is published, install the tagged GitHub source or a release tarball; the repository is public:
 
 ```sh
-npm install --save-dev github:iceSheep2003/code-quality-gate#v0.4.0
+npm install --save-dev github:iceSheep2003/code-quality-gate#v0.5.0
 npx --no-install code-quality-gate setup
 ```
 
 After the npm release is published, the equivalent installation is:
 
 ```sh
-npm install --save-dev code-quality-gate@0.4.0
+npm install --save-dev code-quality-gate@0.5.0
 npx code-quality-gate setup
 ```
 
@@ -114,10 +114,10 @@ Coverage and mutation scores must come from real tools. Code Quality Gate does n
 
 The [Python example](examples/python) uses only the standard library. Built-in [JS/TS static checks](docs/js-ts-checks.md) remain available through `code-quality-gate check`.
 
-## Reports and exit codes
+## Reports, history and exit codes
 
 ```sh
-code-quality-gate audit > quality-report.md
+code-quality-gate audit --note "Describe the implementation change" > quality-report.md
 code-quality-gate audit --json > quality-report.json
 code-quality-gate audit --format sarif > quality-report.sarif
 ```
@@ -134,7 +134,11 @@ An ordinary audit produces a compact report:
 | Coverage | FAILED | Branch coverage: 67 (>= 75) | Branch coverage: 67; required >= 75 |
 ```
 
-Workflow runs save each report under `.quality/code-quality-gate/<task-id>/` and update `.quality/code-quality-gate/latest.md` and `latest.json`. Red's underlying audit is expected to fail; the workflow separately records whether that failure qualified as valid red evidence.
+Each CLI/MCP audit or workflow phase appends to `.quality/code-quality-gate/history.jsonl` and updates `history.md`. The tables compare each iteration's code fingerprint, changed filenames, metrics, thresholds, decision and optional `--note`. Detailed reports are retained under the task directory, with `latest.md` and `latest.json` pointing to the most recent result.
+
+Defaults record all threshold metrics plus JUnit test counts/results and LCOV coverage. `audit.history.metrics` selects the displayed columns, including mutation score, duplication or complexity paths supplied by project tools. Unmeasured values stay missing/error/not-run. See the [history specification](docs/history.md) for the exact recorded fields and configuration.
+
+A valid red phase is accepted while its underlying tests still fail; both facts are retained. Human/agent notes never replace measured numbers.
 
 | Exit code | Meaning |
 | --- | --- |

@@ -1,3 +1,4 @@
+import { tool } from "../version.mjs";
 function cell(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -90,7 +91,7 @@ export function auditSarif(result) {
     version: "2.1.0",
     runs: [
       {
-        tool: { driver: { name: "code-quality-gate", version: "0.4.0" } },
+        tool: { driver: tool },
         invocations: [
           {
             executionSuccessful: !(result.checks || []).some(
