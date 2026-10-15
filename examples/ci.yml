@@ -1,0 +1,21 @@
+# 宿主项目将本包作为 devDependency 安装并提交锁文件。
+# quality.config.json 及测试/适配脚本应来自用户确认的可信版本。
+name: Code quality
+on: [push, pull_request]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # 按项目语言，在此安装 Python/JDK/Go/Rust 及测试工具。
+      - run: npm ci --ignore-scripts
+      - run: npx --no-install veritygate audit > quality-report.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: veritygate-report
+          path: quality-report.md

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "audit": {
+    "checks": [
+      {
+        "id": "acceptance",
+        "title": "Shipping acceptance contract",
+        "command": ["python3", "test_contract.py"],
+        "report": ".quality/acceptance.xml",
+        "format": "junit",
+        "metrics": [
+          { "name": "Executed tests", "path": "tests", "min": 6 },
+          { "name": "Test success rate", "path": "successRate", "equals": 100 },
+          { "name": "Skipped tests", "path": "skipped", "equals": 0 }
+        ]
+      }
+    ]
+  }
+}

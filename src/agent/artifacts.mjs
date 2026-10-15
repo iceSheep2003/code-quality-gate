@@ -1,0 +1,69 @@
+import { randomUUID } from "node:crypto";
+import { auditMarkdown } from "../audit/markdown.mjs";
+import { writeJson, writeText } from "../files.mjs";
+export function failedAudit(rule, message) {
+  return {
+    passed: false,
+    checks: [
+      {
+        id: "workflow",
+        title: "Test-first workflow",
+        status: "failed",
+        required: true,
+        violations: [{ rule, message }],
+      },
+    ],
+    summary: { total: 1, passed: 0, failed: 1, errors: 0, blocking: 1 },
+  };
+}
+export function workflowMarkdown(result) {
+  return `# VerityGate workflow\n\n**Phase:** ${result.phase}\n\n**Phase accepted:** ${result.passed ? "yes" : "no"}\n\n**Ready to merge:** ${result.canMerge ? "yes" : "no"}\n\n${result.message}\n\n${auditMarkdown(result.audit)}`;
+}
+export async function saveIteration(
+  root,
+  task,
+  { phase, audit, accepted, message },
+) {
+  audit = decisionAudit(audit, accepted, message);
+  const prefix = `.quality/veritygate/${task.id}/${phase}-${randomUUID()}`;
+  const result = {
+    schemaVersion: 1,
+    id: task.id,
+    phase,
+    passed: accepted,
+    canMerge: accepted && phase === "gate",
+    message,
+    report: `${prefix}.md`,
+    audit,
+  };
+  const markdown = workflowMarkdown(result);
+  await writeText(root, result.report, markdown);
+  await writeJson(root, `${prefix}.json`, result);
+  await writeText(root, ".quality/veritygate/latest.md", markdown);
+  await writeJson(root, ".quality/veritygate/latest.json", result);
+  return result;
+}
+export async function rejected(root, task, phase, message) {
+  return saveIteration(root, task, {
+    phase: phase,
+    audit: failedAudit("workflow", message),
+    accepted: false,
+    message: message,
+  });
+}
+
+function decisionAudit(audit, accepted, message) {
+  if (accepted || !audit.passed) return audit;
+  const block = failedAudit("workflow", message);
+  return {
+    ...audit,
+    passed: false,
+    checks: [...audit.checks, ...block.checks],
+    summary: {
+      ...audit.summary,
+      total: audit.summary.total + 1,
+      failed: audit.summary.failed + 1,
+      blocking: audit.summary.blocking + 1,
+    },
+  };
+}

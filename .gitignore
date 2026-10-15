@@ -1,0 +1,10 @@
+node_modules/
+coverage/
+*.tgz
+.quality-tdd/
+.quality/
+__pycache__/
+quality-report.*
+.veritygate/run.lock/
+.veritygate/.gitkeep
+.mcp.json
