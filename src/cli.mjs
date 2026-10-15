@@ -15,88 +15,7 @@ import { runProjectAudit } from "./audit/project-audit.mjs";
 import { auditMarkdown, auditSarif } from "./audit/markdown.mjs";
 import { dispatchAgent } from "./agent/dispatch.mjs";
 import { workflowMarkdown } from "./agent/artifacts.mjs";
-const usage = `code-quality-gate <setup|workflow|gate|status|mcp|audit|check|init|baseline|tdd|verify> [options]
-  --root DIRECTORY       Project root (default: current directory)
-  --config FILE          Relative JSON config (default: quality.config.json)
-  --format FORMAT        audit/workflow/gate: markdown|json|sarif; others: text|json|sarif
-  --json                 Alias for --format json
-  --note TEXT            Record an implementation-change note (audit/workflow/gate)
-  --accept-existing      Explicitly record current findings as legacy (baseline)
-  --change FILE          Task/contract (workflow/gate/tdd/verify)
-  --phase red|green|baseline  Evidence phase (workflow: red|green; tdd: red|green|baseline)
-  --help, -h             Show help
-  --version, -v          Show version
-check does not execute project code. audit runs configured tools; tdd runs Node tests.
-Exit codes: 0 passed, 1 findings/evidence failed, 2 configuration or access error.`;
-const commandFlags = {
-  setup: ["root", "format"],
-  workflow: ["root", "config", "manifest", "phase", "format", "note"],
-  gate: ["root", "config", "manifest", "format", "note"],
-  status: ["root", "format"],
-  mcp: ["root"],
-  check: ["root", "config", "format"],
-  audit: ["root", "config", "format", "note"],
-  init: ["root", "config", "format"],
-  baseline: ["root", "config", "format", "acceptExisting"],
-  tdd: ["root", "manifest", "phase", "format"],
-  verify: ["root", "manifest", "format"],
-};
-const valued = {
-  "--root": "root",
-  "--config": "config",
-  "--format": "format",
-  "--change": "manifest",
-  "--phase": "phase",
-  "--note": "note",
-};
-function parseFlag(argv, index, result, given) {
-  const [arg, ...rest] = argv[index].split("="),
-    inline = rest.join("=");
-  if (arg === "--json" && !rest.length) {
-    result.format = "json";
-    given.push("format");
-    return index;
-  }
-  if (arg === "--accept-existing" && !rest.length) {
-    result.acceptExisting = true;
-    given.push("acceptExisting");
-    return index;
-  }
-  if (!valued[arg]) throw new Error("Unknown CLI argument: " + argv[index]);
-  const value = rest.length ? inline : argv[++index];
-  if (!value || value.startsWith("--"))
-    throw new Error("Missing value for " + arg);
-  result[valued[arg]] = value;
-  given.push(valued[arg]);
-  return index;
-}
-function validateOptions(result, given) {
-  if (!commandFlags[result.command])
-    throw new Error("Unknown command: " + result.command);
-  if (given.some((flag) => !commandFlags[result.command].includes(flag)))
-    throw new Error("Flag is not supported by " + result.command);
-  validateFormat(result);
-  if (
-    ["tdd", "verify", "workflow"].includes(result.command) &&
-    !result.manifest
-  )
-    throw new Error("--change is required");
-  if (["tdd", "workflow"].includes(result.command) && !result.phase)
-    throw new Error("--phase is required");
-}
-function options(argv) {
-  const result = {
-      command: argv[0] || "check",
-      root: process.cwd(),
-      format: ["audit", "workflow", "gate"].includes(argv[0])
-        ? "markdown"
-        : "text",
-    },
-    given = [];
-  for (let i = 1; i < argv.length; i++) i = parseFlag(argv, i, result, given);
-  validateOptions(result, given);
-  return result;
-}
+import { usage, options, defaultFormat } from "./cli-options.mjs";
 async function loadConfig(root, opts) {
   if (opts.config) await within(root, opts.config);
   return readConfig(root, opts.config);
@@ -157,14 +76,24 @@ async function dispatch(opts) {
 const argv = process.argv.slice(2);
 let format = argv.includes("--json")
   ? "json"
-  : argv.find((x) => x.startsWith("--format="))?.slice(9) ||
+  : argv
+      .find((x) => /^(--format|-f)=/.test(x))
+      ?.split("=")
+      .slice(1)
+      .join("=") ||
     (argv.includes("--format")
       ? argv[argv.indexOf("--format") + 1]
-      : undefined) ||
-    (["audit", "workflow", "gate"].includes(argv[0]) ? "markdown" : "text");
+      : argv.includes("-f")
+        ? argv[argv.indexOf("-f") + 1]
+        : undefined) ||
+    defaultFormat(argv[0]);
 try {
-  if (argv.some((a) => ["--help", "-h"].includes(a))) console.log(usage);
-  else if (argv.some((a) => ["--version", "-v"].includes(a)))
+  if (argv[0] === "help" || argv.some((a) => ["--help", "-h"].includes(a)))
+    console.log(usage);
+  else if (
+    argv[0] === "version" ||
+    argv.some((a) => ["--version", "-v"].includes(a))
+  )
     console.log(tool.version);
   else {
     const opts = options(argv);
@@ -212,17 +141,7 @@ try {
     );
   } else if (!["json", "sarif"].includes(format)) {
     console.error(formatReport(result, "text"));
-    console.error("Run code-quality-gate --help for usage.");
+    console.error("Run cqg help for usage.");
   } else console.log(formatReport(result, format));
   process.exitCode = 2;
-}
-
-function validateFormat(result) {
-  if (result.note?.length > 1000)
-    throw new Error("--note must be at most 1000 characters");
-  const formats = ["audit", "workflow", "gate"].includes(result.command)
-    ? ["markdown", "json", "sarif"]
-    : ["text", "json", "sarif"];
-  if (!formats.includes(result.format))
-    throw new Error(`Format must be ${formats.join(", ")}`);
 }

@@ -147,16 +147,19 @@ async function green(root, ctx) {
 export async function runWorkflow(options) {
   return withWorkflowLock(options.root, () => executeWorkflow(options));
 }
-async function executeWorkflow({
-  root,
-  manifest,
-  phase,
-  config = "quality.config.json",
-  note,
-}) {
+async function executeWorkflow({ root, manifest, phase, config, note }) {
   if (!["red", "green"].includes(phase))
     throw new Error("Workflow phase must be red or green");
-  const ctx = await context(root, manifest, config);
+  const active =
+    phase === "green"
+      ? await activeTask(root, manifest, config)
+      : { manifest, config };
+  if (!active) throw new Error("No active task; run cqg red <task> first");
+  const ctx = await context(
+    root,
+    active.manifest,
+    active.config || "quality.config.json",
+  );
   ctx.note = note;
   return phase === "red" ? red(root, ctx) : green(root, ctx);
 }
@@ -207,5 +210,8 @@ async function executeGate({ root, manifest, config, note }) {
 
 async function activeTask(root, manifest, config) {
   if (manifest) return { manifest, config: config || "quality.config.json" };
-  return readJson(root, ".code-quality-gate/active.json", { optional: true });
+  const active = await readJson(root, ".code-quality-gate/active.json", {
+    optional: true,
+  });
+  return active ? { ...active, config: config || active.config } : null;
 }

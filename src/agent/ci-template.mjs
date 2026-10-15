@@ -17,7 +17,7 @@ jobs:
           if [ -f .code-quality-gate/ci-setup.sh ]; then
             sh .code-quality-gate/ci-setup.sh
           fi
-      - run: code-quality-gate gate
+      - run: cqg gate
       - uses: actions/upload-artifact@v4
         if: always()
         with:

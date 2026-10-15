@@ -66,9 +66,9 @@ Each numeric table cell carries the bounds used for that observation, so later p
 ## Add a change note
 
 ```sh
-code-quality-gate workflow --change .code-quality-gate/tasks/FEATURE-001.json --phase green --note "Handle the empty-input boundary"
-code-quality-gate audit --note "Check the parser extraction"
-code-quality-gate gate --note "Final verification before merge"
+cqg green --note "Handle the empty-input boundary"
+cqg audit --note "Check the parser extraction"
+cqg gate --note "Final verification before merge"
 ```
 
 MCP red/green/audit/gate tools accept the same optional `note` field. Notes are limited to 1,000 characters. Markdown table content is escaped.

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 import {
   setupAgent,
   runWorkflow,
@@ -75,6 +76,81 @@ async function project(fn, overrides = {}) {
 const phase = (root, value) => runWorkflow({ root, manifest, phase: value });
 const fix = (root) =>
   writeFile(join(root, "business.mjs"), "export const add=(a,b)=>a+b;");
+const runCli = (root, ...args) =>
+  spawnSync(process.execPath, [cli, ...args], {
+    cwd: root,
+    encoding: "utf8",
+  });
+test("short commands retain test-first evidence, active configuration and final gate protection", async () => {
+  await project(async (root) => {
+    await writeFile(
+      join(root, "custom.json"),
+      await readFile(join(root, "quality.config.json")),
+    );
+    const missing = runCli(root, "green", "--json");
+    assert.equal(missing.status, 2);
+    assert.match(missing.stdout, /No active task/);
+    const red = runCli(root, "red", "ADD", "-c", "custom.json", "--json");
+    assert.equal(red.status, 0, red.stderr + red.stdout);
+    assert.equal(JSON.parse(red.stdout).audit.passed, false);
+    assert.equal(runCli(root, "green", "--json").status, 1);
+    await fix(root);
+    const green = runCli(root, "green", "-n", "Implement addition", "--json");
+    assert.equal(green.status, 0, green.stderr + green.stdout);
+    assert.equal(JSON.parse(green.stdout).canMerge, false);
+    const gate = runCli(root, "gate", "--json");
+    assert.equal(gate.status, 0, gate.stderr + gate.stdout);
+    assert.equal(JSON.parse(gate.stdout).canMerge, true);
+    const history = (
+      await readFile(join(root, JSON.parse(gate.stdout).history.jsonl), "utf8")
+    )
+      .trim()
+      .split("\n")
+      .map(JSON.parse);
+    assert.equal(history[2].note, "Implement addition");
+    await writeFile(join(root, "business.mjs"), "export const add=(a,b)=>-1;");
+    assert.equal(
+      runCli(root, "gate", "ADD", "-c", "custom.json", "--json").status,
+      1,
+    );
+  });
+});
+test("short workflow commands accept explicit manifest paths and keep legacy CLI compatibility", async () => {
+  await project(async (root) => {
+    const red = runCli(root, "red", manifest);
+    assert.equal(red.status, 0, red.stderr + red.stdout);
+    assert.match(red.stdout, /# /);
+    await fix(root);
+    const green = runCli(
+      root,
+      "workflow",
+      "--change",
+      manifest,
+      "--phase",
+      "green",
+      "--json",
+    );
+    assert.equal(green.status, 0, green.stderr + green.stdout);
+    assert.equal(runCli(root, "gate", "ADD", "--json").status, 0);
+  });
+});
+test("short commands reject ambiguous tasks and retain root path confinement", async () => {
+  await project(async (root) => {
+    for (const args of [
+      ["red"],
+      ["red", "ADD", "--phase", "green"],
+      ["red", "ADD", "--change", manifest],
+      ["green", "ADD", "OTHER"],
+      ["red", "../outside.json"],
+    ]) {
+      const result = runCli(root, ...args, "--json");
+      assert.equal(result.status, 2, args.join(" ") + result.stdout);
+    }
+    const duplicateRoot = runCli(root, "mcp", root, "--root", root);
+    assert.equal(duplicateRoot.status, 2);
+    assert.match(duplicateRoot.stderr, /specified twice/);
+  });
+});
 test("setup preserves user instructions/configuration and installs idempotent skills and MCP entry", async () => {
   await project(async (root) => {
     const config = await readFile(join(root, "quality.config.json"), "utf8");
@@ -292,7 +368,8 @@ test("MCP stdio provides real discovery and the complete red/green/gate workflow
   await project(async (root) => {
     const transport = new StdioClientTransport({
       command: process.execPath,
-      args: [cli, "mcp", "--root", root],
+      args: [cli, "mcp"],
+      cwd: root,
       stderr: "pipe",
     });
     const client = new Client({
@@ -345,6 +422,38 @@ test("MCP stdio provides real discovery and the complete red/green/gate workflow
       );
     } finally {
       await client.close();
+    }
+  });
+});
+
+test("MCP accepts a positional directory and short root flag from outside the project", async () => {
+  await project(async (root) => {
+    for (const args of [
+      ["mcp", root],
+      ["mcp", "-C", root],
+    ]) {
+      const client = new Client({
+        name: "cqg-directory-test",
+        version: "1.0.0",
+      });
+      const transport = new StdioClientTransport({
+        command: process.execPath,
+        args: [cli, ...args],
+        cwd: tmpdir(),
+        stderr: "pipe",
+      });
+      try {
+        await client.connect(transport);
+        const result = await client.callTool({
+          name: "code_quality_gate_status",
+          arguments: {},
+        });
+        const status = JSON.parse(result.content[0].text);
+        assert.equal(status.configuredChecks[0].id, "acceptance");
+        assert.equal(status.active, null);
+      } finally {
+        await client.close();
+      }
     }
   });
 });

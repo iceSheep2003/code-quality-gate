@@ -5,18 +5,18 @@
 Code Quality Gate is a Node CLI with a `bin` entry. Publish it to npm once and users can install it or execute it through npx. npx is an npm package runner, not a separate registry.
 
 ```sh
-npm install --save-dev code-quality-gate@0.5.1
-npx code-quality-gate setup
-npx code-quality-gate audit
+npm install --save-dev code-quality-gate@0.6.0
+npx --no-install cqg setup
+npx --no-install cqg audit
 ```
 
 For a one-off execution after publication:
 
 ```sh
-npx --yes code-quality-gate@0.5.1 audit --root /path/to/project
+npm exec --yes --package=code-quality-gate@0.6.0 -- cqg audit
 ```
 
-The package is currently prepared for publication. npm commands above become available after an actual successful registry publish; an available name is not a reservation. `code-quality` remains an executable alias for earlier local consumers.
+The package is currently prepared for publication. npm commands above become available after an actual successful registry publish; an available name is not a reservation. `cqg` is the primary executable. `code-quality-gate` and `code-quality` remain executable aliases for compatibility. For local installations use `npx --no-install cqg` to avoid downloading an unrelated registry package named cqg.
 
 ## First publication
 
@@ -47,16 +47,16 @@ The repository is public. The workflow publishes with provenance so consumers ca
 
 ## GitHub source and release archives
 
-Authenticated users can install the tagged source before npm publication:
+Anyone can install the public tagged source before npm publication:
 
 ```sh
-npm install --save-dev github:iceSheep2003/code-quality-gate#v0.5.1
+npm install --save-dev github:iceSheep2003/code-quality-gate#v0.6.0
 ```
 
 The generated host-project CI template installs the matching tagged GitHub source and does not require an npm release. The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
 
 ```sh
-npm install --save-dev ./code-quality-gate-0.5.1.tgz
+npm install --save-dev ./code-quality-gate-0.6.0.tgz
 ```
 
 ## pip / pipx / uv
