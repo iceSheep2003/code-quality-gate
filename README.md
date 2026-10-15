@@ -1,167 +1,103 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/logo.svg" width="88" height="88" alt="Code Quality Gate logo">
+  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/logo.svg" width="72" height="72" alt="Code Quality Gate">
 </p>
 <h1 align="center">Code Quality Gate</h1>
-<p align="center"><strong>Tests first. Measured iterations. A gate before merge.</strong></p>
 <p align="center">English · <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/README.zh-CN.md">简体中文</a></p>
 <p align="center">
-  <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="Package verification"></a>
-  <a href="https://github.com/iceSheep2003/code-quality-gate/releases"><img src="https://img.shields.io/github/v/release/iceSheep2003/code-quality-gate" alt="GitHub release"></a>
+  <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/cqg"><img src="https://img.shields.io/npm/v/cqg" alt="npm version"></a>
   <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
-  <img src="https://img.shields.io/badge/node-%E2%89%A522.13-339933" alt="Node.js 22.13 or newer">
 </p>
 
-Code Quality Gate gives AI coding agents a test-first acceptance workflow. The agent writes tests, records a real failure, implements the behavior and repeats checks until the configured standards pass. Every iteration adds measured results to a Markdown history. A fresh final gate verifies the code before merge.
+**`cqg` runs your project's tests and quality checks, records each attempt, and verifies the result before merge.** It gives coding agents a test-first workflow through project instructions, a bundled skill and an MCP server.
 
-The npm package and command are both **`cqg`**. The project is Code Quality Gate. It runs your project's tools, so the code under test can use any language.
+The checks use your existing toolchain. Python, Java, Go, Rust and other languages connect through commands and JSON, JUnit or LCOV reports. JavaScript and TypeScript also have built-in static analysis.
 
-[Install](#install) · [Commands](#commands) · [Agent integration](#agent-integration) · [Reports](#reports-that-keep-the-history) · [Configuration](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)
+![HTML report from a real Python test and coverage run](https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/report-preview-en.png)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/report-preview-en.png" width="1100" alt="A real offline HTML quality report with iteration trends and gate results">
-</p>
-<p align="center"><sub>Actual report from a Python acceptance-test and coverage run. One HTML file holds all recorded data.</sub></p>
+The same offline HTML file keeps every recorded task and iteration, including failed attempts.
 
-## Install
+## Get started
 
-Requires **Node.js 22.13+** and the toolchain used by your project. Install from npm, then connect a project:
-
-```sh
-npm install -g cqg
-cd your-project
-cqg setup
-```
-
-Ask your coding agent to implement a feature. The installed instructions guide it through configuring real checks, writing acceptance tests, recording red, repairing the implementation and running the final gate. Setup leaves existing project configuration in place.
-
-<details>
-<summary>Prefer a project-local installation?</summary>
-
-```sh
-npm install -D cqg
-npx --no-install cqg setup
-```
-
-For a local install, prefix other commands with `npx --no-install` too. Both the package name and executable are `cqg`. [GitHub source and release tarballs](https://github.com/iceSheep2003/code-quality-gate/releases) are alternative installation sources. See [distribution](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md) for version pinning and publishing.
-
-</details>
-
-To run setup once without a global installation:
+Requires **Node.js 22.13+** and your project's test tools. In the project directory:
 
 ```sh
 npx cqg setup
 ```
 
-Run that command in the project directory. New releases use the short npm name `cqg`; the previous `code-quality-gate@0.6.1` release remains available under its original name.
+Setup adds instructions to `AGENTS.md` and `CLAUDE.md`, installs the workflow skill, and writes MCP configuration and a GitHub Actions template. It preserves existing instructions and creates `quality.config.json` if it is missing.
 
-## Commands
+Your coding agent then configures checks in that file and declares the task's requirements, acceptance tests and implementation files. The [Python example](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python) and [configuration reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md) show the required inputs. Setup does not select tests or thresholds for you.
 
-Run commands from the project directory. Use `-C <directory>` when working elsewhere.
+For regular use, install the command:
 
-| Command | Purpose |
-| --- | --- |
-| `cqg setup` | Install agent instructions, skills, MCP configuration and a CI template |
-| `cqg mcp` | Start the MCP server for the current project |
-| `cqg red FEATURE-001` | Record failing acceptance tests for a declared task |
-| `cqg green` | Run all checks for the active task and record the iteration |
-| `cqg gate` | Rerun required checks and verify evidence before merge |
-| `cqg status` | Show the active task and latest result |
-| `cqg audit` | Run configured checks and save reports without establishing TDD evidence |
-| `cqg check` | Run built-in JS/TS static checks |
-| `cqg help` | Show every command and option |
-| `cqg version` | Show the installed version |
+```sh
+npm install -g cqg
+```
 
-A typical agent cycle is:
+## Test-first workflow
+
+Once the agent has created a task manifest, a typical cycle is:
 
 ```sh
 cqg red FEATURE-001
-# Implement the behavior. Repeat green after each change.
-cqg green -n "Handle the empty-input boundary"
+# Implement the feature, then rerun green after each change.
+cqg green -n "Handle empty input"
 cqg gate
 ```
 
-The agent creates the task manifest first. A task ID resolves to `.code-quality-gate/tasks/<id>.json`; explicit relative manifest paths also work. Green resumes the task and quality configuration recorded by red. Tests, requirements, adapters and thresholds freeze after red. The default green-attempt budget is 12, configurable from 1 to 100.
+`red` requires failing assertions in a JUnit acceptance report. Loading errors, skipped tests and an already-passing suite do not qualify. After red, tests, requirements, adapters and thresholds are frozen for that task. `green` runs all configured checks and records the attempt; the default budget is 12 attempts. `gate` reruns the checks and rejects implementation changes made after the accepted green result.
 
-Common options: `-C /path/to/project`, `-c custom.json`, `-n "Change note"`, `--json`, `-f sarif`. Long options and explicit `workflow --change ... --phase ...` are also available. `cqg init` creates a JS/TS static configuration; use `cqg setup` for agent integration.
+The agent writes and revises the code. `cqg` executes checks and returns evidence and failures for the next iteration. It does not start an AI agent by itself. See the [workflow skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md) for the full procedure.
 
-## Agent integration
+## Choose the quality requirements
 
-`cqg setup` adds managed sections to `AGENTS.md` and `CLAUDE.md`, installs the workflow skill under `.agents/skills/` and `.claude/skills/`, writes a local `.mcp.json`, and creates a GitHub Actions gate template. It creates `quality.config.json` only when one is missing. Existing user instructions, unrelated MCP servers and CI files are preserved; customized skills require review.
+Set a minimum, maximum or exact value for numeric metrics. Other checks can use the command's exit status.
 
-For an MCP client that needs a server command:
+| Check | Input |
+| --- | --- |
+| Test counts, failures, skips and success rate | JUnit XML |
+| Line, branch and function coverage | LCOV or JSON |
+| Mutation score, surviving mutants, duplication or custom metrics | JSON from the project's tools or adapter |
+| Type checking, linting and builds | Command exit status |
+| JS/TS complexity, nesting, function size and dependency cycles | Built-in `cqg check` |
 
-```sh
-cqg mcp
-```
+A missing metric, stale report, tool error or timeout cannot pass. Coverage and mutation tools must be installed and configured in the target project. Each metric is evaluated separately; there is no combined quality grade.
 
-The client must start it in the project directory. To select another project, use `cqg mcp ./my-project`. Setup generates a configuration that fixes the project root automatically. Clients that do not discover project instructions or MCP configuration need a one-time manual connection.
+[Tool adapters and task manifests](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md) · [Built-in JS/TS checks](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/js-ts-checks.md)
 
-The MCP server exposes status, setup, begin, red, green, audit and gate tools with the `code_quality_gate_` prefix. Only a successful final gate returns `canMerge: true`. MCP stdout stays reserved for protocol traffic. The connected agent writes the implementation; this package supplies the workflow and measurements.
+## Read the results
 
-Read the [packaged skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md) and [task/configuration reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md) for integration details.
+Open **`.quality/code-quality-gate/report.html`** after any audit, red, green or gate run. Each run updates this one file with:
 
-## Bring your own checks
+- Metric trends and the thresholds used in each iteration.
+- Task, phase, time, change notes, changed files and code fingerprints.
+- Check results, duration, failure reasons and recorded tool output.
+- Expandable complete records, plus filters, English/Chinese labels and printing.
 
-Use existing language tools for tests, coverage, mutation, duplication, complexity or type checking. Configure commands as argv arrays and set thresholds on their real reports. A minimal `quality.config.json`:
+The desktop report works offline. Green marks values within their configured bounds, red marks failures, and amber marks thresholds. Unmeasured values remain distinct from zero. Workflow acceptance, check results and merge readiness appear separately: an accepted red phase still contains failing tests.
 
-```json
-{
-  "version": 1,
-  "audit": {
-    "checks": [
-      {
-        "id": "acceptance",
-        "title": "Acceptance tests",
-        "command": ["python3", "-m", "pytest", "--junitxml=.quality/tests.xml"],
-        "report": ".quality/tests.xml",
-        "format": "junit",
-        "metrics": [
-          { "name": "Tests", "path": "tests", "min": 1 },
-          { "name": "Success rate", "path": "successRate", "equals": 100 },
-          { "name": "Skipped tests", "path": "skipped", "equals": 0 }
-        ]
-      }
-    ]
-  }
-}
-```
+Markdown summaries and a JSONL history are saved alongside the HTML. The report currently includes aggregate coverage and test results; source-line coverage and individual test-case views require richer adapters.
 
-Commands run in the project root without a shell. JSON, JUnit and LCOV support numeric thresholds; command/text checks rely on exit status. Missing metrics, stale or invalid reports, tool errors and timeouts cannot pass. A valid red phase needs failing assertions; already-passing tests, skips and known loading errors do not establish red.
+[HTML report reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/html-reports.md) · [History fields](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/history.md)
 
-Coverage and mutation scores come from project tools. The package records each metric separately and does not turn coverage into a correctness claim or an invented overall grade. See [adapters](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md), the [Python example](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python) and [JS/TS static checks](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/js-ts-checks.md).
+## Commands and integration
 
-## Reports that keep the history
+| Command | Use |
+| --- | --- |
+| `cqg setup` | Connect the project to a coding agent |
+| `cqg mcp` | Start the MCP server in the current project |
+| `cqg red <task>` / `cqg green` / `cqg gate` | Record and verify the test-first cycle |
+| `cqg status` | Inspect the active task |
+| `cqg audit` | Run configured checks without TDD evidence |
+| `cqg check` | Run built-in JS/TS static checks |
+| `cqg help` | Show all commands and options |
 
-Every audit, red, green and gate also saves **HTML automatically**. Open **`.quality/code-quality-gate/report.html`**: one file contains every task, iteration, measurement and recorded diagnostic. Each run updates this file; it does not create more HTML files. The desktop interface uses a dark navy palette matching the project mark, with a light print view. No server, internet connection or external chart library is needed.
+Use `-C <directory>` for another project and `-n "Change note"` to describe an iteration. JSON and SARIF output are available; `-f html` prints HTML. Exit codes are **0** for a pass or accepted phase, **1** for failed checks or evidence, and **2** for configuration or access errors.
 
-The report includes per-task metric trends with each iteration's bounds, searchable iteration/metric/check tables, English/Chinese switching, and print/PDF styles. Missing measurements break the line. Measurements without thresholds are labelled `measured`. Built-in `cqg check -f html` also shows per-function JS/TS metrics.
+For MCP clients, start `cqg mcp` in the project directory, or use `cqg mcp ./my-project`. Clients that do not discover the generated configuration need a one-time manual connection.
 
-```sh
-cqg audit
-# Open .quality/code-quality-gate/report.html
-```
-
-[HTML report reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/html-reports.md). Reports show metrics supplied by project tools; they do not invent line-by-line source coverage or test case detail absent from those reports.
-
-```sh
-cqg audit -n "Check the parser change"
-cqg audit --json > quality-report.json
-cqg audit -f sarif > quality-report.sarif
-```
-
-Each audit, red, green and gate appends an observation to `.quality/code-quality-gate/history.jsonl`, then regenerates `history.md` and the single offline `report.html` dashboard. Tables record the task and phase, timestamp, code fingerprint, changed files, measured metrics, threshold bounds, decisions and change notes. Per-check results include exit status, duration and failure reasons. Earlier measurements remain in the ledger.
-
-Defaults include all threshold metrics, JUnit test counts/results and LCOV percentages. Choose displayed columns through `audit.history.metrics`, including mutation or complexity values supplied by project tools. Missing, error, not-run and actual zero remain distinct. Agent notes describe changes; executed tools supply the numbers.
-
-A [real Python run](https://github.com/iceSheep2003/code-quality-gate/releases/download/v0.6.0/code-quality-gate-history.md) records two failed tests alongside 100% coverage, followed by zero failures after a boundary fix. [History reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/history.md) documents every recorded field. Detailed iteration reports and `latest.md` / `latest.json` are saved alongside the history.
-
-## Enforce before merge
-
-The generated CI job is named `quality-gate`. Make it a required check on the target branch. Commit task manifests, evidence and the active-task pointer under `.code-quality-gate/`; generated reports remain untracked and are uploaded as CI artifacts. Later edits to declared implementation files invalidate the green snapshot.
-
-Trusted CI and repository permissions enforce the merge boundary. Protect tests, adapters, quality policy and workflow files from unreviewed changes. Local hashes detect changed inputs, but writable local evidence cannot prove that an agent followed every step. A passing test suite also depends on the requirements and test scope being complete. Project commands run with the caller's permissions.
-
-Exit codes: **0** passed or phase accepted; **1** checks/evidence failed; **2** configuration, arguments or access error. An accepted red phase still records the expected underlying test failure.
+To enforce the result on GitHub, make the generated `quality-gate` CI job a required check. Commit task manifests and evidence under `.code-quality-gate/`. Review and protect tests, quality configuration, adapters and CI workflows. Local evidence is writable; repository permissions and trusted CI enforce merge restrictions. Test quality and declared file scope still determine what a passing gate establishes.
 
 ## Development
 
@@ -170,11 +106,6 @@ npm ci --ignore-scripts
 npm test
 npm run format:check
 npm run check
-npm pack
 ```
 
-The package checks its own source with the default static thresholds. CI runs Node 22/24 on Linux, macOS and Windows.
-
-## License
-
-[MIT](https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE). Dependencies retain their own licenses; see [third-party notices](https://github.com/iceSheep2003/code-quality-gate/blob/main/THIRD_PARTY_NOTICES.md).
+CI runs Node 22/24 on Linux, macOS and Windows. The package checks its own source with the default static thresholds.

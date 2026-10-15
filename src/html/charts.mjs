@@ -64,7 +64,7 @@ function dots(points) {
     .filter((point) => point.y !== null)
     .map(
       ({ entry, metric, x, y }) =>
-        `<circle class="point ${metric.status === "failed" ? "failed" : "passed"}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="4"><title>${escape(`#${entry.sequence}: ${number(metric.actual)} ${policy(metric)} · ${metric.status}`)}</title></circle>`,
+        `<circle class="point ${escape(policy(metric) ? metric.status : "measured")}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="4"><title>${escape(`#${entry.sequence}: ${number(metric.actual)} ${policy(metric)} · ${metric.status}`)}</title></circle>`,
     )
     .join("");
 }

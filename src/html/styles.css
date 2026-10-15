@@ -1,14 +1,14 @@
 :root {
-  color-scheme: dark;
-  --ink: #e4e9f1;
-  --muted: #9ca9ba;
-  --line: #293447;
-  --paper: #151f30;
-  --ground: #0f172a;
-  --blue: #acbccf;
-  --green: #80c7ac;
-  --red: #ee9795;
-  --amber: #e0bf87;
+  color-scheme: light;
+  --ink: #202e43;
+  --muted: #617087;
+  --line: #dce3ec;
+  --paper: #ffffff;
+  --ground: #f7f9fc;
+  --blue: #315fa6;
+  --green: #18714d;
+  --red: #ba3b3b;
+  --amber: #94600f;
   font-family:
     "Helvetica Neue", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-variant-numeric: tabular-nums;
@@ -37,7 +37,7 @@ select {
 button,
 select,
 input {
-  border: 1px solid #354359;
+  border: 1px solid #c7d1df;
   border-radius: 4px;
   background: var(--paper);
   padding: 7px 10px;
@@ -50,17 +50,18 @@ button {
   white-space: nowrap;
 }
 button:hover {
-  background: #1c293e;
-  border-color: #71819b;
+  background: #edf2f9;
+  border-color: #869bb9;
 }
 button:active {
   transform: translateY(1px);
 }
 :focus-visible {
-  outline: 2px solid #90b3ce;
+  outline: 2px solid #315fa6;
   outline-offset: 3px;
 }
 header {
+  background: var(--paper);
   border-bottom: 1px solid var(--line);
   padding: 15px max(28px, calc((100% - 1180px) / 2));
   display: flex;
@@ -160,8 +161,9 @@ small {
   overflow-wrap: anywhere;
 }
 .decision-panel {
-  padding: 0 0 0 24px;
-  border-left: 1px solid var(--line);
+  padding: 14px 18px;
+  border-left: 3px solid var(--line);
+  background: var(--paper);
 }
 .decision-heading {
   font:
@@ -179,6 +181,14 @@ small {
   height: 7px;
   border-radius: 50%;
   background: var(--muted);
+}
+.is-passed {
+  border-left-color: var(--green);
+  background: #edf7f1;
+}
+.is-failed {
+  border-left-color: var(--red);
+  background: #fff0ef;
 }
 .is-passed .decision-heading {
   color: var(--green);
@@ -321,7 +331,7 @@ nav a[aria-current] {
   vertical-align: middle;
 }
 .legend .bound {
-  border-color: #8492a5;
+  border-color: #a97728;
   border-top-style: dashed;
 }
 .chart-grid {
@@ -369,15 +379,32 @@ nav a[aria-current] {
   margin-left: 6px;
   font-size: 11px;
 }
+.metric-value.failed {
+  color: var(--red);
+}
+.metric-value.passed {
+  color: var(--green);
+}
+.metric-value.error {
+  color: var(--amber);
+}
+.chart:has(.chart-reading .failed) {
+  background: #fff4f2;
+}
+#metric-history td:has(> .metric-value.failed) {
+  background: #fff0ed;
+}
 .chart-reading .badge {
   display: block;
   margin-top: 5px;
   font-size: 9px;
-  padding-right: 0;
+  padding: 2px 6px;
+  width: fit-content;
+  margin-left: auto;
 }
 .grid {
   fill: none;
-  stroke: #233047;
+  stroke: #e3e9f1;
   stroke-width: 1;
 }
 .trend-line {
@@ -391,6 +418,9 @@ nav a[aria-current] {
   stroke-width: 1.5;
 }
 .point.passed {
+  fill: var(--green);
+}
+.point.measured {
   fill: var(--blue);
 }
 .point.failed {
@@ -398,7 +428,7 @@ nav a[aria-current] {
 }
 .threshold {
   fill: none;
-  stroke: #8492a5;
+  stroke: #a97728;
   stroke-width: 1.5;
   stroke-dasharray: 3 2;
 }
@@ -415,12 +445,15 @@ nav a[aria-current] {
 }
 .badge.passed {
   color: var(--green);
+  background: #e5f3eb;
 }
 .badge.failed {
   color: var(--red);
+  background: #fbe7e5;
 }
 .badge.error {
   color: var(--amber);
+  background: #fff0d5;
 }
 .badge.missing,
 .badge.not-run {
@@ -428,7 +461,7 @@ nav a[aria-current] {
 }
 .table-scroll {
   overflow-x: auto;
-  border-top: 1px solid #354359;
+  border-top: 1px solid #c7d1df;
   border-bottom: 1px solid var(--line);
 }
 table {
@@ -439,8 +472,8 @@ table {
 }
 th {
   font-weight: 500;
-  background: #172235;
-  color: #b0bdd0;
+  background: #edf2f8;
+  color: #455670;
   white-space: nowrap;
 }
 th,
@@ -457,7 +490,7 @@ tbody tr:last-child td {
   border-bottom: 0;
 }
 tbody tr:hover {
-  background: #172338;
+  background: #f0f4fa;
 }
 td {
   min-width: 90px;
@@ -493,7 +526,7 @@ td .badge {
   margin-right: 8px;
 }
 .check-detail summary:hover {
-  background: #172338;
+  background: #f0f4fa;
 }
 .detail-meta {
   float: right;
@@ -518,7 +551,7 @@ pre {
     11px/1.6 "Menlo",
     Consolas,
     monospace;
-  background: #141f32;
+  background: #edf2f8;
   padding: 14px;
   overflow: auto;
   white-space: pre-wrap;
@@ -549,8 +582,8 @@ footer p {
 }
 .noscript {
   padding: 12px;
-  background: #352d20;
-  color: #e0bf87;
+  background: #fff4db;
+  color: #80530c;
 }
 .skip-link {
   position: absolute;
