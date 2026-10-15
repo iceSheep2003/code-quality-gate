@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="assets/logo.svg" width="88" height="88" alt="Code Quality Gate logo">
+  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/logo.svg" width="88" height="88" alt="Code Quality Gate logo">
 </p>
 <h1 align="center">Code Quality Gate</h1>
 <p align="center"><strong>Tests first. Measured iterations. A gate before merge.</strong></p>
-<p align="center">English · <a href="README.zh-CN.md">简体中文</a></p>
+<p align="center">English · <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/README.zh-CN.md">简体中文</a></p>
 <p align="center">
   <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="Package verification"></a>
   <a href="https://github.com/iceSheep2003/code-quality-gate/releases"><img src="https://img.shields.io/github/v/release/iceSheep2003/code-quality-gate" alt="GitHub release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
+  <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/node-%E2%89%A522.13-339933" alt="Node.js 22.13 or newer">
 </p>
 
@@ -15,14 +15,14 @@ Code Quality Gate gives AI coding agents a test-first acceptance workflow. The a
 
 The package is **`code-quality-gate`**. The command is **`cqg`**. It runs your project's tools, so the code under test can use any language.
 
-[Install](#install) · [Commands](#commands) · [Agent integration](#agent-integration) · [Reports](#reports-that-keep-the-history) · [Configuration](docs/adapters.md)
+[Install](#install) · [Commands](#commands) · [Agent integration](#agent-integration) · [Reports](#reports-that-keep-the-history) · [Configuration](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)
 
 ## Install
 
-Requires **Node.js 22.13+** and the toolchain used by your project. Install the public GitHub release, then connect a project:
+Requires **Node.js 22.13+** and the toolchain used by your project. Install from npm, then connect a project:
 
 ```sh
-npm install -g github:iceSheep2003/code-quality-gate#v0.6.0
+npm install -g code-quality-gate
 cd your-project
 cqg setup
 ```
@@ -33,13 +33,21 @@ Ask your coding agent to implement a feature. The installed instructions guide i
 <summary>Prefer a project-local installation?</summary>
 
 ```sh
-npm install -D github:iceSheep2003/code-quality-gate#v0.6.0
+npm install -D code-quality-gate
 npx --no-install cqg setup
 ```
 
-For a local install, prefix other commands with `npx --no-install` too. The npm registry package has not been published yet. The GitHub source and [release tarballs](https://github.com/iceSheep2003/code-quality-gate/releases) work now; see [distribution](docs/publishing.md) for npm publishing.
+For a local install, prefix other commands with `npx --no-install` too. The package name is `code-quality-gate`; `cqg` is its bundled executable. [GitHub source and release tarballs](https://github.com/iceSheep2003/code-quality-gate/releases) are alternative installation sources. See [distribution](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md) for version pinning and publishing.
 
 </details>
+
+To run setup once without a global installation:
+
+```sh
+npx code-quality-gate setup
+```
+
+Run that command in the project directory. Use the package name with npx; `npx cqg` refers to a different registry package.
 
 ## Commands
 
@@ -85,7 +93,7 @@ The client must start it in the project directory. To select another project, us
 
 The MCP server exposes status, setup, begin, red, green, audit and gate tools with the `code_quality_gate_` prefix. Only a successful final gate returns `canMerge: true`. MCP stdout stays reserved for protocol traffic. The connected agent writes the implementation; this package supplies the workflow and measurements.
 
-Read the [packaged skill](skills/code-quality-gate/SKILL.md) and [task/configuration reference](docs/adapters.md) for integration details.
+Read the [packaged skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md) and [task/configuration reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md) for integration details.
 
 ## Bring your own checks
 
@@ -115,7 +123,7 @@ Use existing language tools for tests, coverage, mutation, duplication, complexi
 
 Commands run in the project root without a shell. JSON, JUnit and LCOV support numeric thresholds; command/text checks rely on exit status. Missing metrics, stale or invalid reports, tool errors and timeouts cannot pass. A valid red phase needs failing assertions; already-passing tests, skips and known loading errors do not establish red.
 
-Coverage and mutation scores come from project tools. The package records each metric separately and does not turn coverage into a correctness claim or an invented overall grade. See [adapters](docs/adapters.md), the [Python example](examples/python) and [JS/TS static checks](docs/js-ts-checks.md).
+Coverage and mutation scores come from project tools. The package records each metric separately and does not turn coverage into a correctness claim or an invented overall grade. See [adapters](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md), the [Python example](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python) and [JS/TS static checks](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/js-ts-checks.md).
 
 ## Reports that keep the history
 
@@ -129,7 +137,7 @@ Each audit, red, green and gate appends an observation to `.quality/code-quality
 
 Defaults include all threshold metrics, JUnit test counts/results and LCOV percentages. Choose displayed columns through `audit.history.metrics`, including mutation or complexity values supplied by project tools. Missing, error, not-run and actual zero remain distinct. Agent notes describe changes; executed tools supply the numbers.
 
-A [real Python run](https://github.com/iceSheep2003/code-quality-gate/releases/download/v0.6.0/code-quality-gate-history.md) records two failed tests alongside 100% coverage, followed by zero failures after a boundary fix. [History reference](docs/history.md) documents every recorded field. Detailed iteration reports and `latest.md` / `latest.json` are saved alongside the history.
+A [real Python run](https://github.com/iceSheep2003/code-quality-gate/releases/download/v0.6.0/code-quality-gate-history.md) records two failed tests alongside 100% coverage, followed by zero failures after a boundary fix. [History reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/history.md) documents every recorded field. Detailed iteration reports and `latest.md` / `latest.json` are saved alongside the history.
 
 ## Enforce before merge
 
@@ -153,4 +161,4 @@ The package checks its own source with the default static thresholds. CI runs No
 
 ## License
 
-[MIT](LICENSE). Dependencies retain their own licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).
+[MIT](https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE). Dependencies retain their own licenses; see [third-party notices](https://github.com/iceSheep2003/code-quality-gate/blob/main/THIRD_PARTY_NOTICES.md).
