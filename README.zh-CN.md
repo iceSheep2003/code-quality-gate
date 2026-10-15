@@ -5,7 +5,7 @@
 <p align="center"><a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/README.md">English</a> · 简体中文</p>
 <p align="center">
   <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://www.npmjs.com/package/cqg"><img src="https://img.shields.io/npm/v/cqg" alt="npm 版本"></a>
+  <a href="https://www.npmjs.com/package/code-quality-gate"><img src="https://img.shields.io/npm/v/code-quality-gate" alt="npm 版本"></a>
   <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT 许可证"></a>
 </p>
 
@@ -22,17 +22,17 @@
 需要 **Node.js 22.13+**，以及项目自身的测试工具。在项目目录执行：
 
 ```sh
-npx cqg setup
+npx code-quality-gate setup
 ```
 
 Setup 会向 `AGENTS.md` 和 `CLAUDE.md` 添加指令，安装工作流 skill，生成 MCP 配置和 GitHub Actions 模板。已有指令会保留；没有 `quality.config.json` 时会创建该文件。
 
 接下来由编程 AI 在配置中接入检查，并声明本次任务的需求、验收测试和实现文件。[Python 示例](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python)和[配置说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)提供了完整输入。Setup 不会替项目决定测试内容或质量门槛。
 
-经常使用时，可以安装命令：
+npm 包名为 `code-quality-gate`，安装后的命令为 `cqg`。经常使用时可以安装：
 
 ```sh
-npm install -g cqg
+npm install -g code-quality-gate
 ```
 
 ## 先写测试，再改实现

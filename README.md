@@ -5,7 +5,7 @@
 <p align="center">English · <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/README.zh-CN.md">简体中文</a></p>
 <p align="center">
   <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://www.npmjs.com/package/cqg"><img src="https://img.shields.io/npm/v/cqg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/code-quality-gate"><img src="https://img.shields.io/npm/v/code-quality-gate" alt="npm version"></a>
   <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
 </p>
 
@@ -22,17 +22,17 @@ The same offline HTML file keeps every recorded task and iteration, including fa
 Requires **Node.js 22.13+** and your project's test tools. In the project directory:
 
 ```sh
-npx cqg setup
+npx code-quality-gate setup
 ```
 
 Setup adds instructions to `AGENTS.md` and `CLAUDE.md`, installs the workflow skill, and writes MCP configuration and a GitHub Actions template. It preserves existing instructions and creates `quality.config.json` if it is missing.
 
 Your coding agent then configures checks in that file and declares the task's requirements, acceptance tests and implementation files. The [Python example](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python) and [configuration reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md) show the required inputs. Setup does not select tests or thresholds for you.
 
-For regular use, install the command:
+The npm package is `code-quality-gate`; the installed command is `cqg`. For regular use:
 
 ```sh
-npm install -g cqg
+npm install -g code-quality-gate
 ```
 
 ## Test-first workflow
