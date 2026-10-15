@@ -1,6 +1,6 @@
 {
   "name": "code-quality-gate",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Test-first quality gates for AI coding agents, with language-independent checks and Markdown reports",
   "type": "module",
   "license": "MIT",
@@ -9,6 +9,7 @@
   },
   "exports": "./src/index.mjs",
   "bin": {
+    "cqg": "src/cli.mjs",
     "code-quality-gate": "src/cli.mjs",
     "code-quality": "src/cli.mjs"
   },
@@ -16,6 +17,8 @@
     "src",
     "skills",
     "README.md",
+    "README.zh-CN.md",
+    "assets",
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
     "docs",

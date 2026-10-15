@@ -5,6 +5,48 @@ import { mkdtemp, writeFile, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 const cli = resolve("src/cli.mjs");
+test("help and version have short discoverable command forms", () => {
+  const help = spawnSync(process.execPath, [cli, "help"], { encoding: "utf8" });
+  assert.equal(help.status, 0, help.stderr);
+  assert.match(help.stdout, /cqg mcp/);
+  assert.match(help.stdout, /cqg red/);
+  const version = spawnSync(process.execPath, [cli, "version"], {
+    encoding: "utf8",
+  });
+  const legacy = spawnSync(process.execPath, [cli, "--version"], {
+    encoding: "utf8",
+  });
+  assert.equal(version.status, 0, version.stderr);
+  assert.equal(version.stdout, legacy.stdout);
+});
+test("short root and format flags work from another working directory", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "quality-short-cli-"));
+  try {
+    await mkdir(join(dir, "src"));
+    await writeFile(join(dir, "src/good.mjs"), "export const good=1;");
+    const result = spawnSync(
+      process.execPath,
+      [cli, "check", "-C", dir, "-f=json"],
+      { encoding: "utf8" },
+    );
+    assert.equal(result.status, 0, result.stderr + result.stdout);
+    assert.equal(JSON.parse(result.stdout).summary.files, 1);
+    for (const flag of [["-f=json"], ["-f", "json"]]) {
+      const invalid = spawnSync(
+        process.execPath,
+        [cli, "check", ...flag, "--unknown"],
+        { encoding: "utf8" },
+      );
+      assert.equal(invalid.status, 2);
+      assert.equal(
+        JSON.parse(invalid.stdout).violations[0].rule,
+        "configuration",
+      );
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 test("CLI fails closed for empty scope, syntax errors and unknown config fields", async () => {
   const dir = await mkdtemp(join(tmpdir(), "quality-cli-"));
   try {

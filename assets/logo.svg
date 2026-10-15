@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Code Quality Gate</title>
+  <rect width="96" height="96" rx="24" fill="#0F172A"/>
+  <path d="M31 27H23V69H31M65 27H73V69H65" stroke="#E2E8F0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M36 48L46 58L63 37" stroke="#34D399" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
