@@ -9,7 +9,7 @@ import {
   rowData,
 } from "./model.mjs";
 function table(headers, rows, id) {
-  return `<div class="table-scroll"><table id="${id}"><thead><tr>${headers.map(([en, zh]) => `<th scope="col">${text(en, zh)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  return `<p class="table-hint">${text("Scroll horizontally for all columns", "横向滚动查看完整列")}</p><div class="table-scroll" tabindex="0" role="region" aria-label="${id}"><table id="${id}"><thead><tr>${headers.map(([en, zh]) => `<th scope="col">${text(en, zh)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function source(entry) {
   const value = entry.source;

@@ -26,6 +26,7 @@ function filterRows() {
     "#iterations tbody tr:not([hidden])",
   ).length;
   document.querySelector("#visible-count").textContent = String(visible);
+  document.querySelector("#no-matches").hidden = visible > 0;
 }
 for (const field of [task, phase, outcome, search])
   field.addEventListener("input", filterRows);
@@ -48,3 +49,14 @@ document
   .querySelector("#print")
   .addEventListener("click", () => window.print());
 filterRows();
+
+function updateNavigation() {
+  const target = window.location.hash || "#trends";
+  for (const link of document.querySelectorAll("nav a")) {
+    if (link.getAttribute("href") === target)
+      link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  }
+}
+window.addEventListener("hashchange", updateNavigation);
+updateNavigation();

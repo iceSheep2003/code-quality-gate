@@ -52,7 +52,7 @@ export function metricCell(metric) {
   const value = metric.actual === null ? metric.status : number(metric.actual);
   const status =
     metric.status === "passed" && !policy(metric) ? "measured" : metric.status;
-  return `<strong>${escape(value)}</strong> <small>${escape(policy(metric))}</small> ${badge(status)}`;
+  return `<strong class="metric-value ${escape(status)}">${escape(value)}</strong> <small>${escape(policy(metric))}</small> ${badge(status)}`;
 }
 export function normalizeAudit(result = {}) {
   if (result.audit) return result.audit;

@@ -1,167 +1,103 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/logo.svg" width="88" height="88" alt="Code Quality Gate 标识">
+  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/logo.svg" width="72" height="72" alt="Code Quality Gate">
 </p>
 <h1 align="center">Code Quality Gate</h1>
-<p align="center"><strong>先写测试，逐轮记录，达标后再合并。</strong></p>
 <p align="center"><a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/README.md">English</a> · 简体中文</p>
 <p align="center">
-  <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="跨平台检查"></a>
-  <a href="https://github.com/iceSheep2003/code-quality-gate/releases"><img src="https://img.shields.io/github/v/release/iceSheep2003/code-quality-gate" alt="GitHub 版本"></a>
+  <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/cqg"><img src="https://img.shields.io/npm/v/cqg" alt="npm 版本"></a>
   <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT 许可证"></a>
-  <img src="https://img.shields.io/badge/node-%E2%89%A522.13-339933" alt="需要 Node.js 22.13 或更新版本">
 </p>
 
-Code Quality Gate 为 AI 编程提供一套测试先行的验收流程：AI 先写测试，记录真实失败，再实现功能并反复检查，直到满足项目设置的质量门槛。每轮检测结果都会追加到 Markdown 历史表格中，合并前还需要通过一次最新检查。
+**`cqg` 执行项目的测试和质量检查，记录每轮结果，并在合并前重新验证。** 它通过项目指令、内置 skill 和 MCP 服务，让编程 AI 按照先写测试、再改实现的流程工作。
 
-npm 包名和命令统一为 **`cqg`**，项目名称为 Code Quality Gate。它调用项目自己的工具，被检查的代码可以使用任何语言。
+检查使用项目已有的工具。Python、Java、Go、Rust 等语言通过命令和 JSON、JUnit、LCOV 报告接入；JavaScript 和 TypeScript 另有内置静态分析。
 
-[安装](#安装) · [命令](#命令) · [接入-ai](#接入-ai) · [累计报告](#累计报告) · [配置参考](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)
+![真实 Python 测试与覆盖率运行生成的 HTML 报告](https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/report-preview-zh.png)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/report-preview-zh.png" width="1100" alt="真实生成的 HTML 质量报告：指标趋势、迭代记录与门禁结果">
-</p>
-<p align="center"><sub>截图来自真实 Python 验收测试和覆盖率检测。一个 HTML 文件保留全部记录。</sub></p>
+所有已记录的任务和迭代都保存在同一个离线 HTML 中，包括失败的尝试。
 
-## 安装
+## 开始使用
 
-需要 **Node.js 22.13+**，以及被测项目所需的语言工具链。从 npm 安装后，在项目目录接入：
-
-```sh
-npm install -g cqg
-cd your-project
-cqg setup
-```
-
-然后把功能需求交给编程 AI。安装的指令会引导 AI 配置真实检查工具、编写验收测试、记录失败、修改实现并执行最终门禁。已有的项目配置会保留。
-
-<details>
-<summary>只在当前项目安装</summary>
-
-```sh
-npm install -D cqg
-npx --no-install cqg setup
-```
-
-本地安装后，其他命令也加上 `npx --no-install` 前缀。包名和命令均为 `cqg`。[GitHub 源码和 Release 安装包](https://github.com/iceSheep2003/code-quality-gate/releases)也可安装。版本固定与发布方式见[分发说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md)。
-
-</details>
-
-不做全局安装，也可以在项目目录直接运行：
+需要 **Node.js 22.13+**，以及项目自身的测试工具。在项目目录执行：
 
 ```sh
 npx cqg setup
 ```
 
-新版本统一发布到短包名 `cqg`；旧的 `code-quality-gate@0.6.1` 仍保留在原包名下。
+Setup 会向 `AGENTS.md` 和 `CLAUDE.md` 添加指令，安装工作流 skill，生成 MCP 配置和 GitHub Actions 模板。已有指令会保留；没有 `quality.config.json` 时会创建该文件。
 
-## 命令
+接下来由编程 AI 在配置中接入检查，并声明本次任务的需求、验收测试和实现文件。[Python 示例](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python)和[配置说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)提供了完整输入。Setup 不会替项目决定测试内容或质量门槛。
 
-在项目目录运行；从其他目录操作时，用 `-C <目录>` 指定项目。
+经常使用时，可以安装命令：
 
-| 命令 | 用途 |
-| --- | --- |
-| `cqg setup` | 安装 AI 指令、Skill、MCP 配置和 CI 模板 |
-| `cqg mcp` | 为当前项目启动 MCP 服务 |
-| `cqg red FEATURE-001` | 为已声明的任务记录失败验收测试 |
-| `cqg green` | 对当前任务运行全部检查，记录本轮结果 |
-| `cqg gate` | 在合并前重新检查代码与测试证据 |
-| `cqg status` | 查看当前任务和最近结果 |
-| `cqg audit` | 执行配置的检测并保存报告，不建立 TDD 证据 |
-| `cqg check` | 执行内置 JS/TS 静态检查 |
-| `cqg help` | 查看全部命令和参数 |
-| `cqg version` | 查看安装版本 |
+```sh
+npm install -g cqg
+```
 
-AI 的常用执行流程：
+## 先写测试，再改实现
+
+AI 创建任务清单后，执行流程如下：
 
 ```sh
 cqg red FEATURE-001
-# 实现功能，每次修改后重新运行 green。
-cqg green -n "处理空输入边界"
+# 编写实现，每次修改后重新运行 green。
+cqg green -n "处理空输入"
 cqg gate
 ```
 
-AI 需要先创建任务清单。任务名对应 `.code-quality-gate/tasks/<任务名>.json`，也可以直接传入清单的相对路径。`green` 自动沿用 `red` 记录的任务和质量配置。记录失败后，测试、需求、适配器和门槛会被冻结。默认最多尝试 12 次，可设置为 1 至 100 次。
+`red` 要求 JUnit 验收报告中存在断言失败。加载错误、跳过测试或原本就通过的测试不能作为 red 证据。记录 red 后，该任务的测试、需求、适配器和门槛会被冻结。`green` 执行所有已配置的检查并记录本轮结果，默认最多尝试 12 次。`gate` 重新运行检查；通过 green 后再次修改实现，会使原先的结果失效。
 
-常用参数：`-C /项目路径`、`-c custom.json`、`-n "修改说明"`、`--json`、`-f sarif`。也可使用完整参数与 `workflow --change ... --phase ...`。`cqg init` 用于创建 JS/TS 静态检查配置；接入 AI 使用 `cqg setup`。
+AI 负责写代码和修改代码，`cqg` 负责执行检查、返回证据和失败原因。这个包本身不会启动 AI。完整流程见[工作流 skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md)。
 
-## 接入 AI
+## 设置质量要求
 
-`cqg setup` 会在 `AGENTS.md`、`CLAUDE.md` 中加入托管指令，在 `.agents/skills/` 和 `.claude/skills/` 下安装工作流 Skill，写入本地 `.mcp.json`，并创建 GitHub Actions 门禁模板。仅在缺少时创建 `quality.config.json`。原有用户指令、其他 MCP 服务及 CI 文件会保留；已有自定义 Skill 需要审查后再更新。
+数值指标可以设置下限、上限或精确值。其他检查可以根据命令退出状态判定。
 
-MCP 客户端需要填写服务命令时，使用：
+| 检查内容 | 数据来源 |
+| --- | --- |
+| 测试数量、失败数、跳过数、成功率 | JUnit XML |
+| 行、分支、函数覆盖率 | LCOV 或 JSON |
+| 变异得分、存活变异、重复率及自定义指标 | 项目工具或适配器输出的 JSON |
+| 类型检查、Lint、构建 | 命令退出状态 |
+| JS/TS 复杂度、嵌套、函数大小、依赖环 | 内置 `cqg check` |
 
-```sh
-cqg mcp
-```
+指标缺失、报告过期、工具出错或超时都不能通过。覆盖率和变异测试工具需要在目标项目中安装、配置。每个指标单独判定，不合成为一个质量总分。
 
-客户端需要从项目目录启动服务；指定其他项目可用 `cqg mcp ./my-project`。通过 setup 生成的配置会自动固定项目目录。若客户端不自动读取项目指令或 MCP 配置，需要手动连接一次。
+[工具接入与任务清单](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md) · [内置 JS/TS 检查](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/js-ts-checks.md)
 
-MCP 提供 status、setup、begin、red、green、audit 和 gate 工具，名称前缀为 `code_quality_gate_`。只有最终门禁通过才返回 `canMerge: true`。MCP 的标准输出专用于协议通信。编程 AI 负责修改实现，本包负责工作流与检测记录。
+## 查看结果
 
-完整规则见[内置 Skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md)和[任务与配置说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)。
+运行 audit、red、green 或 gate 后，打开 **`.quality/code-quality-gate/report.html`**。每轮都会更新这个文件，保留：
 
-## 使用项目自己的检测工具
+- 指标趋势，以及每轮实际使用的门槛。
+- 任务、阶段、时间、修改说明、修改文件和代码指纹。
+- 检查结果、耗时、失败原因及已记录的工具输出。
+- 可展开的完整记录，以及筛选、中英文切换和打印功能。
 
-测试、覆盖率、变异测试、重复率、复杂度及类型检查都可以接入已有工具。将执行命令配置为参数数组，再为真实报告中的指标设置门槛。最小 `quality.config.json` 示例：
+报告面向桌面浏览器，支持离线打开。绿色表示指标达标，红色表示失败，琥珀色标出门槛。未测量值与真实的零值分别显示。阶段是否被接受、底层检查结果和是否允许合并分别列出：red 阶段被接受时，测试依然是失败的。
 
-```json
-{
-  "version": 1,
-  "audit": {
-    "checks": [
-      {
-        "id": "acceptance",
-        "title": "Acceptance tests",
-        "command": ["python3", "-m", "pytest", "--junitxml=.quality/tests.xml"],
-        "report": ".quality/tests.xml",
-        "format": "junit",
-        "metrics": [
-          { "name": "Tests", "path": "tests", "min": 1 },
-          { "name": "Success rate", "path": "successRate", "equals": 100 },
-          { "name": "Skipped tests", "path": "skipped", "equals": 0 }
-        ]
-      }
-    ]
-  }
-}
-```
+HTML 旁边还会保存 Markdown 摘要和 JSONL 历史。目前报告展示汇总覆盖率和测试结果；逐行源码覆盖率及单个测试用例视图需要接入更详细的数据。
 
-命令在项目根目录运行，不经过 shell。JSON、JUnit 和 LCOV 支持数值门槛；命令或文本检查依赖退出码判定。缺失指标、旧报告、格式错误、工具崩溃或超时都不能通过。记录 red 必须有真实断言失败；原本就通过的测试、跳过项和已知加载错误不能作为失败证据。
+[HTML 报告说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/html-reports.md) · [历史记录字段](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/history.md)
 
-覆盖率和变异得分来自实际工具，各项指标独立记录。覆盖率不能证明业务正确，本包也不会把不同指标拼成虚构的综合等级。详见[工具适配](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)、[Python 示例](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python)和 [JS/TS 静态检查](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/js-ts-checks.md)。
+## 命令与集成
 
-## 累计报告
+| 命令 | 用途 |
+| --- | --- |
+| `cqg setup` | 将项目接入编程 AI |
+| `cqg mcp` | 为当前项目启动 MCP 服务 |
+| `cqg red <task>` / `cqg green` / `cqg gate` | 记录并验证测试优先流程 |
+| `cqg status` | 查看当前任务 |
+| `cqg audit` | 运行已配置的检查，不建立 TDD 证据 |
+| `cqg check` | 运行内置 JS/TS 静态检查 |
+| `cqg help` | 查看全部命令和选项 |
 
-每次 audit、red、green 和 gate 都会**自动生成 HTML**。在浏览器打开 **`.quality/code-quality-gate/report.html`**，一个文件包含全部任务、历次指标、修改记录和已记录的检查详情。每轮更新同一个文件，不另建 HTML 文件。无需启动服务器、联网或下载图表库。
+使用 `-C <目录>` 指定其他项目，使用 `-n "修改说明"` 记录本轮改动。支持 JSON 和 SARIF 输出；`-f html` 输出 HTML。退出码 **0** 表示检查通过或阶段被接受，**1** 表示检查或证据不通过，**2** 表示配置或访问错误。
 
-报告支持按任务查看指标趋势与当轮门槛，筛选任务、阶段、判定和修改说明，并提供中英文切换与打印 / PDF 样式。未测量项会断开曲线，未配置门槛的实测值标为 `measured`。内置的 `cqg check -f html` 还会展示 JS/TS 每个函数的静态指标。
+MCP 客户端可在项目目录启动 `cqg mcp`，也可以使用 `cqg mcp ./my-project`。不能自动发现生成配置的客户端，需要手动连接一次。
 
-```sh
-cqg audit
-# 打开 .quality/code-quality-gate/report.html
-```
-
-详见 [HTML 报告说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/html-reports.md)。报告展示项目工具提供的指标，不会补造原始报告未提供的逐行源码覆盖率或测试用例详情。
-
-```sh
-cqg audit -n "检查解析器修改"
-cqg audit --json > quality-report.json
-cqg audit -f sarif > quality-report.sarif
-```
-
-每次 audit、red、green 和 gate 都会向 `.quality/code-quality-gate/history.jsonl` 追加一条记录，并重新生成 `history.md` 表格与唯一的离线 `report.html` 看板。记录包含任务、阶段、时间、代码指纹、修改文件、实际指标、当轮门槛、判定结果与修改说明。各检查还会记录退出状态、耗时和失败原因，之前的测量值会保留。
-
-默认记录所有门槛指标、JUnit 测试数量与结果、LCOV 覆盖率。通过 `audit.history.metrics` 选择展示列，也可以加入项目工具提供的变异得分和复杂度。缺失、错误、未运行和真实的零值会分别表示。AI 写修改说明，检测工具提供数值。
-
-[真实 Python 检测记录](https://github.com/iceSheep2003/code-quality-gate/releases/download/v0.6.0/code-quality-gate-history.md)展示了“覆盖率 100% 但仍有 2 项测试失败”，以及修复边界条件后失败数归零的过程。全部记录字段见[历史说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/history.md)。逐轮详细报告、`latest.md` 和 `latest.json` 保存在历史记录旁。
-
-## 合并前执行门禁
-
-生成的 CI 任务名为 `quality-gate`，可在目标分支设为必需检查。任务清单、证据和当前任务指针保存在 `.code-quality-gate/`，需要随代码提交。生成的报告不进入版本控制，由 CI 上传为附件。再次修改声明的实现文件，会使已有 green 快照失效。
-
-实际合并权限由可信 CI 与仓库设置执行。测试、适配器、质量配置和 CI 工作流应受到审查保护。本地哈希能发现输入变化，但可被写入的本地证据不能证明 AI 执行过每一步；测试通过也依赖需求和测试范围完整。项目命令使用调用者的系统权限运行。
-
-退出码：**0** 检查通过或阶段被接受；**1** 检查或证据不通过；**2** 参数、配置或访问错误。red 被接受时，底层测试失败仍会如实记录。
+如需在 GitHub 上阻止未达标的代码合并，将生成的 `quality-gate` CI 任务设为必需检查。任务清单和证据需要提交到 `.code-quality-gate/`。测试、质量配置、适配器和 CI 工作流应受审查保护。本地证据可以被改写，实际合并限制由仓库权限和可信 CI 执行。测试本身的质量及声明的文件范围，决定了通过门禁能证明什么。
 
 ## 开发
 
@@ -170,11 +106,6 @@ npm ci --ignore-scripts
 npm test
 npm run format:check
 npm run check
-npm pack
 ```
 
-本包用默认静态门槛检查自身源码。CI 在 Linux、macOS 和 Windows 上分别运行 Node 22/24。
-
-## 许可证
-
-[MIT](https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE)。依赖保留各自许可证，详见[第三方声明](https://github.com/iceSheep2003/code-quality-gate/blob/main/THIRD_PARTY_NOTICES.md)。
+CI 在 Linux、macOS 和 Windows 上运行 Node 22/24。本包使用默认静态门槛检查自身源码。
