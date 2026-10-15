@@ -3,6 +3,6 @@ const manifest = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 );
 export const tool = Object.freeze({
-  name: "code-quality-gate",
+  name: manifest.name,
   version: manifest.version,
 });

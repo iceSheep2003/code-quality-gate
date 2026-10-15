@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm install --global --ignore-scripts git+https://github.com/iceSheep2003/code-quality-gate.git#v${tool.version}
+      - run: npm install --global --ignore-scripts cqg@${tool.version}
       - name: Prepare project toolchain
         run: |
           if [ -f .code-quality-gate/ci-setup.sh ]; then

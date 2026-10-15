@@ -5,7 +5,7 @@
 Code Quality Gate is a Node CLI with a `bin` entry. Publish it to npm once and users can install it or execute it through npx. npx is an npm package runner, not a separate registry.
 
 ```sh
-npm install --save-dev code-quality-gate@0.6.1
+npm install --save-dev cqg@0.7.0
 npx --no-install cqg setup
 npx --no-install cqg audit
 ```
@@ -13,10 +13,10 @@ npx --no-install cqg audit
 For a one-off execution after publication:
 
 ```sh
-npm exec --yes --package=code-quality-gate@0.6.1 -- cqg audit
+npm exec --yes --package=cqg@0.7.0 -- cqg audit
 ```
 
-The public package is [code-quality-gate](https://www.npmjs.com/package/code-quality-gate). `cqg` is the primary executable. `code-quality-gate` and `code-quality` remain executable aliases for compatibility. For local installations use `npx --no-install cqg` to avoid downloading an unrelated registry package named cqg.
+The public package and executable are both `cqg`. `npx cqg setup` runs setup without a global install. The previous `code-quality-gate@0.6.1` release remains separate under its original name.
 
 ## First publication
 
@@ -50,13 +50,13 @@ The repository is public. The workflow publishes with provenance so consumers ca
 The public tagged source is an alternative to the npm registry:
 
 ```sh
-npm install --save-dev github:iceSheep2003/code-quality-gate#v0.6.1
+npm install --save-dev github:iceSheep2003/code-quality-gate#v0.7.0
 ```
 
-The generated host-project CI template installs the matching tagged GitHub source. The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
+The generated host-project CI template installs the exact `cqg` npm version used to generate it. Publish that version before using the template in another project. The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
 
 ```sh
-npm install --save-dev ./code-quality-gate-0.6.1.tgz
+npm install --save-dev ./cqg-0.7.0.tgz
 ```
 
 ## pip / pipx / uv

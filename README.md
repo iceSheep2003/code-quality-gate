@@ -13,16 +13,21 @@
 
 Code Quality Gate gives AI coding agents a test-first acceptance workflow. The agent writes tests, records a real failure, implements the behavior and repeats checks until the configured standards pass. Every iteration adds measured results to a Markdown history. A fresh final gate verifies the code before merge.
 
-The package is **`code-quality-gate`**. The command is **`cqg`**. It runs your project's tools, so the code under test can use any language.
+The npm package and command are both **`cqg`**. The project is Code Quality Gate. It runs your project's tools, so the code under test can use any language.
 
 [Install](#install) · [Commands](#commands) · [Agent integration](#agent-integration) · [Reports](#reports-that-keep-the-history) · [Configuration](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/report-preview-en.png" width="1100" alt="A real offline HTML quality report with iteration trends and gate results">
+</p>
+<p align="center"><sub>Actual report from a Python acceptance-test and coverage run. One HTML file holds all recorded data.</sub></p>
 
 ## Install
 
 Requires **Node.js 22.13+** and the toolchain used by your project. Install from npm, then connect a project:
 
 ```sh
-npm install -g code-quality-gate
+npm install -g cqg
 cd your-project
 cqg setup
 ```
@@ -33,21 +38,21 @@ Ask your coding agent to implement a feature. The installed instructions guide i
 <summary>Prefer a project-local installation?</summary>
 
 ```sh
-npm install -D code-quality-gate
+npm install -D cqg
 npx --no-install cqg setup
 ```
 
-For a local install, prefix other commands with `npx --no-install` too. The package name is `code-quality-gate`; `cqg` is its bundled executable. [GitHub source and release tarballs](https://github.com/iceSheep2003/code-quality-gate/releases) are alternative installation sources. See [distribution](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md) for version pinning and publishing.
+For a local install, prefix other commands with `npx --no-install` too. Both the package name and executable are `cqg`. [GitHub source and release tarballs](https://github.com/iceSheep2003/code-quality-gate/releases) are alternative installation sources. See [distribution](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md) for version pinning and publishing.
 
 </details>
 
 To run setup once without a global installation:
 
 ```sh
-npx code-quality-gate setup
+npx cqg setup
 ```
 
-Run that command in the project directory. Use the package name with npx; `npx cqg` refers to a different registry package.
+Run that command in the project directory. New releases use the short npm name `cqg`; the previous `code-quality-gate@0.6.1` release remains available under its original name.
 
 ## Commands
 
@@ -77,7 +82,7 @@ cqg gate
 
 The agent creates the task manifest first. A task ID resolves to `.code-quality-gate/tasks/<id>.json`; explicit relative manifest paths also work. Green resumes the task and quality configuration recorded by red. Tests, requirements, adapters and thresholds freeze after red. The default green-attempt budget is 12, configurable from 1 to 100.
 
-Common options: `-C /path/to/project`, `-c custom.json`, `-n "Change note"`, `--json`, `-f sarif`. Existing `code-quality-gate` and `code-quality` commands, long options and explicit `workflow --change ... --phase ...` remain available. `cqg init` creates a JS/TS static configuration; use `cqg setup` for agent integration.
+Common options: `-C /path/to/project`, `-c custom.json`, `-n "Change note"`, `--json`, `-f sarif`. Long options and explicit `workflow --change ... --phase ...` are also available. `cqg init` creates a JS/TS static configuration; use `cqg setup` for agent integration.
 
 ## Agent integration
 
@@ -127,13 +132,24 @@ Coverage and mutation scores come from project tools. The package records each m
 
 ## Reports that keep the history
 
+Every audit, red, green and gate also saves **HTML automatically**. Open **`.quality/code-quality-gate/report.html`**: one file contains every task, iteration, measurement and recorded diagnostic. Each run updates this file; it does not create more HTML files. No server, internet connection or external chart library is needed.
+
+The report includes per-task metric trends with each iteration's bounds, searchable iteration/metric/check tables, English/Chinese switching, and print/PDF styles. Missing measurements break the line. Measurements without thresholds are labelled `measured`. Built-in `cqg check -f html` also shows per-function JS/TS metrics.
+
+```sh
+cqg audit
+# Open .quality/code-quality-gate/report.html
+```
+
+[HTML report reference](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/html-reports.md). Reports show metrics supplied by project tools; they do not invent line-by-line source coverage or test case detail absent from those reports.
+
 ```sh
 cqg audit -n "Check the parser change"
 cqg audit --json > quality-report.json
 cqg audit -f sarif > quality-report.sarif
 ```
 
-Each audit, red, green and gate appends an observation to `.quality/code-quality-gate/history.jsonl`, then regenerates `history.md`. Tables record the task and phase, timestamp, code fingerprint, changed files, measured metrics, threshold bounds, decisions and change notes. Per-check results include exit status, duration and failure reasons. Earlier measurements remain in the ledger.
+Each audit, red, green and gate appends an observation to `.quality/code-quality-gate/history.jsonl`, then regenerates `history.md` and the single offline `report.html` dashboard. Tables record the task and phase, timestamp, code fingerprint, changed files, measured metrics, threshold bounds, decisions and change notes. Per-check results include exit status, duration and failure reasons. Earlier measurements remain in the ledger.
 
 Defaults include all threshold metrics, JUnit test counts/results and LCOV percentages. Choose displayed columns through `audit.history.metrics`, including mutation or complexity values supplied by project tools. Missing, error, not-run and actual zero remain distinct. Agent notes describe changes; executed tools supply the numbers.
 

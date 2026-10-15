@@ -19,6 +19,7 @@ export async function agentStatus(root) {
     latest,
     history: {
       markdown: ".quality/code-quality-gate/history.md",
+      html: ".quality/code-quality-gate/report.html",
       jsonl: ".quality/code-quality-gate/history.jsonl",
     },
     configuredChecks: (config.audit?.checks || []).map((check) => ({

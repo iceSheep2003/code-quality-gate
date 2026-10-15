@@ -22,8 +22,8 @@ Static checks and compatibility
 Options
   -C, --root DIRECTORY     Project root (default: current directory)
   -c, --config FILE        Relative JSON config (default: quality.config.json)
-  -f, --format FORMAT      audit/red/green/workflow/gate: markdown|json|sarif;
-                           other commands: text|json|sarif
+  -f, --format FORMAT      audit/red/green/workflow/gate: markdown|html|json|sarif;
+                           check: text|html|json|sarif; others: text|json|sarif
       --json               Alias for --format json
   -n, --note TEXT          Record an implementation-change note
       --change FILE        Explicit task/contract path
@@ -33,7 +33,6 @@ Options
   -v, --version            Show version
 
 Tasks are IDs in .code-quality-gate/tasks/ or project-relative manifest paths.
-All commands also work as code-quality-gate or code-quality.
 check does not execute project code. audit runs configured tools; tdd runs Node tests.
 Exit codes: 0 passed, 1 checks/evidence failed, 2 configuration or access error.`;
 
@@ -145,8 +144,10 @@ function validateFormat(result) {
     throw new Error("--note must be at most 1000 characters");
   const formats =
     defaultFormat(result.command) === "markdown"
-      ? ["markdown", "json", "sarif"]
-      : ["text", "json", "sarif"];
+      ? ["markdown", "html", "json", "sarif"]
+      : result.command === "check"
+        ? ["text", "html", "json", "sarif"]
+        : ["text", "json", "sarif"];
   if (!formats.includes(result.format))
     throw new Error(`Format must be ${formats.join(", ")}`);
 }

@@ -17,6 +17,11 @@ export async function runProjectAudit(root, options = {}) {
         note: options.note,
       },
     );
-    return { ...audit, report: result.report, history: result.history };
+    return {
+      ...audit,
+      report: result.report,
+      html: result.html,
+      history: result.history,
+    };
   });
 }

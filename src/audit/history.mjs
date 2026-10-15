@@ -7,9 +7,10 @@ import { withWorkflowLock } from "../agent/lock.mjs";
 import { measuredMetrics } from "./history-metrics.mjs";
 import { historySource } from "./history-source.mjs";
 import { historyMarkdown } from "./history-markdown.mjs";
+import { reportHtml } from "../html/report.mjs";
 const directory = ".quality/code-quality-gate";
 const ledger = `${directory}/history.jsonl`;
-async function readEntries(root) {
+export async function readHistory(root) {
   let raw;
   try {
     raw = await readSource(root, ledger);
@@ -52,6 +53,10 @@ function checkFacts(audit) {
     status: check.status,
     exitCode: check.exitCode ?? null,
     durationMs: check.durationMs ?? null,
+    reportFormat: check.reportFormat,
+    metrics: check.metrics || {},
+    thresholds: check.thresholds || [],
+    violations: check.violations || [],
     details: (check.violations || [])
       .map((violation) => violation.message)
       .join("; "),
@@ -78,12 +83,16 @@ async function makeEntry(root, input, entries) {
     metrics: measurement.metrics,
     displayMetrics: measurement.display,
     checks: checkFacts(input.audit),
+    audit: {
+      startedAt: input.audit.startedAt || null,
+      summary: input.audit.summary || {},
+    },
     previousHash: entries.at(-1)?.recordHash || null,
   };
   return { ...value, recordHash: hash(value) };
 }
 async function appendHistory(root, input) {
-  const entries = await readEntries(root);
+  const entries = await readHistory(root);
   const entry = await makeEntry(root, input, entries);
   if (!entries.length) await writeText(root, ledger, "");
   await appendFile(await within(root, ledger), JSON.stringify(entry) + "\n");
@@ -96,11 +105,14 @@ async function appendHistory(root, input) {
     taskMarkdown,
     historyMarkdown(entries.filter((item) => item.task.id === input.task.id)),
   );
+  const html = `${directory}/report.html`;
+  await writeText(root, html, reportHtml({ entries }));
   return {
     sequence: entry.sequence,
     iteration: entry.iteration,
     markdown,
     taskMarkdown,
+    html,
     jsonl: ledger,
   };
 }
