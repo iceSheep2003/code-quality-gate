@@ -13,16 +13,21 @@
 
 Code Quality Gate 为 AI 编程提供一套测试先行的验收流程：AI 先写测试，记录真实失败，再实现功能并反复检查，直到满足项目设置的质量门槛。每轮检测结果都会追加到 Markdown 历史表格中，合并前还需要通过一次最新检查。
 
-安装包叫 **`code-quality-gate`**，命令统一叫 **`cqg`**。它调用项目自己的工具，被检查的代码可以使用任何语言。
+npm 包名和命令统一为 **`cqg`**，项目名称为 Code Quality Gate。它调用项目自己的工具，被检查的代码可以使用任何语言。
 
 [安装](#安装) · [命令](#命令) · [接入-ai](#接入-ai) · [累计报告](#累计报告) · [配置参考](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/report-preview-zh.png" width="1100" alt="真实生成的 HTML 质量报告：指标趋势、迭代记录与门禁结果">
+</p>
+<p align="center"><sub>截图来自真实 Python 验收测试和覆盖率检测。一个 HTML 文件保留全部记录。</sub></p>
 
 ## 安装
 
 需要 **Node.js 22.13+**，以及被测项目所需的语言工具链。从 npm 安装后，在项目目录接入：
 
 ```sh
-npm install -g code-quality-gate
+npm install -g cqg
 cd your-project
 cqg setup
 ```
@@ -33,21 +38,21 @@ cqg setup
 <summary>只在当前项目安装</summary>
 
 ```sh
-npm install -D code-quality-gate
+npm install -D cqg
 npx --no-install cqg setup
 ```
 
-本地安装后，其他命令也加上 `npx --no-install` 前缀。包名为 `code-quality-gate`，`cqg` 是它提供的命令。[GitHub 源码和 Release 安装包](https://github.com/iceSheep2003/code-quality-gate/releases)也可安装。版本固定与发布方式见[分发说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md)。
+本地安装后，其他命令也加上 `npx --no-install` 前缀。包名和命令均为 `cqg`。[GitHub 源码和 Release 安装包](https://github.com/iceSheep2003/code-quality-gate/releases)也可安装。版本固定与发布方式见[分发说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md)。
 
 </details>
 
 不做全局安装，也可以在项目目录直接运行：
 
 ```sh
-npx code-quality-gate setup
+npx cqg setup
 ```
 
-npx 使用包名；`npx cqg` 会查找另一个同名包。
+新版本统一发布到短包名 `cqg`；旧的 `code-quality-gate@0.6.1` 仍保留在原包名下。
 
 ## 命令
 
@@ -77,7 +82,7 @@ cqg gate
 
 AI 需要先创建任务清单。任务名对应 `.code-quality-gate/tasks/<任务名>.json`，也可以直接传入清单的相对路径。`green` 自动沿用 `red` 记录的任务和质量配置。记录失败后，测试、需求、适配器和门槛会被冻结。默认最多尝试 12 次，可设置为 1 至 100 次。
 
-常用参数：`-C /项目路径`、`-c custom.json`、`-n "修改说明"`、`--json`、`-f sarif`。原有的 `code-quality-gate`、`code-quality`、完整参数及 `workflow --change ... --phase ...` 仍可使用。`cqg init` 用于创建 JS/TS 静态检查配置；接入 AI 使用 `cqg setup`。
+常用参数：`-C /项目路径`、`-c custom.json`、`-n "修改说明"`、`--json`、`-f sarif`。也可使用完整参数与 `workflow --change ... --phase ...`。`cqg init` 用于创建 JS/TS 静态检查配置；接入 AI 使用 `cqg setup`。
 
 ## 接入 AI
 
@@ -127,13 +132,24 @@ MCP 提供 status、setup、begin、red、green、audit 和 gate 工具，名称
 
 ## 累计报告
 
+每次 audit、red、green 和 gate 都会**自动生成 HTML**。在浏览器打开 **`.quality/code-quality-gate/report.html`**，一个文件包含全部任务、历次指标、修改记录和已记录的检查详情。每轮更新同一个文件，不另建 HTML 文件。无需启动服务器、联网或下载图表库。
+
+报告支持按任务查看指标趋势与当轮门槛，筛选任务、阶段、判定和修改说明，并提供中英文切换与打印 / PDF 样式。未测量项会断开曲线，未配置门槛的实测值标为 `measured`。内置的 `cqg check -f html` 还会展示 JS/TS 每个函数的静态指标。
+
+```sh
+cqg audit
+# 打开 .quality/code-quality-gate/report.html
+```
+
+详见 [HTML 报告说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/html-reports.md)。报告展示项目工具提供的指标，不会补造原始报告未提供的逐行源码覆盖率或测试用例详情。
+
 ```sh
 cqg audit -n "检查解析器修改"
 cqg audit --json > quality-report.json
 cqg audit -f sarif > quality-report.sarif
 ```
 
-每次 audit、red、green 和 gate 都会向 `.quality/code-quality-gate/history.jsonl` 追加一条记录，并重新生成 `history.md` 表格。记录包含任务、阶段、时间、代码指纹、修改文件、实际指标、当轮门槛、判定结果与修改说明。各检查还会记录退出状态、耗时和失败原因，之前的测量值会保留。
+每次 audit、red、green 和 gate 都会向 `.quality/code-quality-gate/history.jsonl` 追加一条记录，并重新生成 `history.md` 表格与唯一的离线 `report.html` 看板。记录包含任务、阶段、时间、代码指纹、修改文件、实际指标、当轮门槛、判定结果与修改说明。各检查还会记录退出状态、耗时和失败原因，之前的测量值会保留。
 
 默认记录所有门槛指标、JUnit 测试数量与结果、LCOV 覆盖率。通过 `audit.history.metrics` 选择展示列，也可以加入项目工具提供的变异得分和复杂度。缺失、错误、未运行和真实的零值会分别表示。AI 写修改说明，检测工具提供数值。
 

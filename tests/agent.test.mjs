@@ -224,6 +224,9 @@ test("real assertions establish red, failed green reports diagnostics, fixed gre
     const gate = await runGate({ root });
     assert.equal(gate.passed, true, JSON.stringify(gate));
     assert.equal(gate.canMerge, true);
+    assert.match(await readFile(join(root, gate.html), "utf8"), /MERGE READY/);
+    assert.match(await readFile(join(root, red.html), "utf8"), /RED accepted/);
+    assert.equal(red.html, gate.html);
     const history = (await readFile(join(root, gate.history.jsonl), "utf8"))
       .trim()
       .split("\n")

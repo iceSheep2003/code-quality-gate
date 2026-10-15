@@ -1,7 +1,7 @@
 {
-  "name": "code-quality-gate",
-  "version": "0.6.1",
-  "description": "Test-first quality gates for AI coding agents, with language-independent checks and Markdown reports",
+  "name": "cqg",
+  "version": "0.7.0",
+  "description": "Test-first quality gates for AI coding agents, with language-independent checks and offline HTML reports",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -9,9 +9,7 @@
   },
   "exports": "./src/index.mjs",
   "bin": {
-    "cqg": "src/cli.mjs",
-    "code-quality-gate": "src/cli.mjs",
-    "code-quality": "src/cli.mjs"
+    "cqg": "src/cli.mjs"
   },
   "files": [
     "src",

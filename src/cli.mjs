@@ -9,7 +9,8 @@ import {
   baselineProject,
 } from "./project.mjs";
 import { recordPhase, verifyEvidence } from "./tdd.mjs";
-import { writeJson, within, safeRelative } from "./files.mjs";
+import { writeJson, within, safeRelative, readSource } from "./files.mjs";
+import { reportHtml } from "./html/report.mjs";
 import { formatReport } from "./reporters.mjs";
 import { runProjectAudit } from "./audit/project-audit.mjs";
 import { auditMarkdown, auditSarif } from "./audit/markdown.mjs";
@@ -104,15 +105,19 @@ try {
     } else {
       const report = { schemaVersion: 1, ...result };
       console.log(
-        format === "markdown"
-          ? (result.phase
-              ? workflowMarkdown(result)
-              : auditMarkdown(report)
-            ).trimEnd()
-          : ["audit", "workflow", "gate"].includes(opts.command) &&
-              format === "sarif"
-            ? JSON.stringify(auditSarif(result.audit || report), null, 2)
-            : formatReport(report, format),
+        format === "html"
+          ? result.html
+            ? await readSource(resolve(opts.root), result.html)
+            : reportHtml({ result })
+          : format === "markdown"
+            ? (result.phase
+                ? workflowMarkdown(result)
+                : auditMarkdown(report)
+              ).trimEnd()
+            : ["audit", "workflow", "gate"].includes(opts.command) &&
+                format === "sarif"
+              ? JSON.stringify(auditSarif(result.audit || report), null, 2)
+              : formatReport(report, format),
       );
       process.exitCode = result.passed ? 0 : 1;
     }
@@ -123,7 +128,9 @@ try {
     passed: false,
     violations: [{ rule: "configuration", message: error.message }],
   };
-  if (format === "markdown") {
+  if (format === "html") {
+    console.log(reportHtml({ result }));
+  } else if (format === "markdown") {
     console.log(
       auditMarkdown({
         ...result,

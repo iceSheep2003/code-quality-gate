@@ -9,6 +9,7 @@ Every CLI/MCP `audit`, `workflow` red/green and final `gate` appends an observat
 | `.quality/code-quality-gate/history.md` | Project-wide iteration, metric and check-execution tables |
 | `.quality/code-quality-gate/<task-id>/history.md` | The same tables limited to one task |
 | `.quality/code-quality-gate/history.jsonl` | Full observations, one JSON object per iteration |
+| `.quality/code-quality-gate/report.html` | The single offline report containing all tasks, measurements and recorded diagnostics |
 | `.quality/code-quality-gate/latest.md` | Detailed report for the most recent run |
 
 A recorded iteration is a tool invocation, not every keystroke. The packaged skill instructs the agent to run green after each implementation iteration. Edits without an audit do not generate invented test results.
@@ -78,3 +79,7 @@ MCP red/green/audit/gate tools accept the same optional `note` field. Notes are 
 Appending history uses a project lock. Earlier JSONL lines are preserved; each new line includes the previous line's hash and its own consistency hash. A corrupt/truncated or inconsistently edited ledger stops recording instead of silently replacing history. If Markdown is deleted or edited, a later observation regenerates it from the ledger.
 
 This consistency chain detects accidental edits, not a hostile actor who can rewrite every file and recompute hashes. Protect trusted CI inputs separately. Histories live under the ignored `.quality/` directory; the generated CI workflow uploads that directory as an artifact. Cross-machine or cross-run retention requires preserving/downloading that artifact or using your own storage. Task red/green evidence remains separate under `.code-quality-gate/` and should be committed as documented in the main README.
+
+HTML is regenerated from the same validated ledger into a single `report.html` on every run. No per-task or per-run HTML files are created. See [HTML reports](html-reports.md). `html` and `history.html` in CLI/MCP results both identify this file; existing report fields retain their Markdown paths.
+
+New observations also preserve each check's numeric metrics, threshold definitions, report format and recorded violations/tool output, plus the audit's summary and start time. Legacy observations without these optional fields remain unchanged. The HTML full-record section includes every recorded field, even metrics omitted from the compact table.

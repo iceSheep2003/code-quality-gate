@@ -2,10 +2,10 @@
 
 ## 内置 JS/TS 静态检查
 
-拿到交付的 `code-quality-gate-0.6.0.tgz` 后，在需要检查的项目根目录执行：
+拿到交付的 `cqg-0.7.0.tgz` 后，在需要检查的项目根目录执行：
 
 ```sh
-npm install --save-dev /实际路径/code-quality-gate-0.6.0.tgz
+npm install --save-dev /实际路径/cqg-0.7.0.tgz
 npx --no-install cqg check
 ```
 
@@ -123,7 +123,7 @@ npx --no-install cqg check
 ## 编程接口
 
 ```js
-import { analyzeSource, evaluateReport, checkProject, resolveConfig, toSarif } from 'code-quality-gate';
+import { analyzeSource, evaluateReport, checkProject, resolveConfig, toSarif } from 'cqg';
 const source = analyzeSource('export const sum=(a:number,b:number)=>a+b;', { filename:'src/sum.ts' });
 console.log(evaluateReport([source]));
 const project = await checkProject(process.cwd(), resolveConfig({ include:['src'] }));

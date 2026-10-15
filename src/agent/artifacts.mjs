@@ -45,6 +45,7 @@ export async function saveIteration(
     message,
     note,
   });
+  result.html = result.history.html;
   const markdown = workflowMarkdown(result);
   await writeText(root, result.report, markdown);
   await writeJson(root, `${prefix}.json`, result);
