@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { analyzeSource, evaluateReport } from "../src/index.mjs";
+import { tool } from "../src/version.mjs";
 const cli = resolve("src/cli.mjs");
 const run = (root, ...args) =>
   spawnSync(process.execPath, [cli, ...args, "--root", root], {
@@ -116,7 +117,7 @@ test("dependency cycles include imports and re-exports; dynamic paths are outsid
 test("SARIF reports source locations and help/version/init work independently", async () => {
   await project(async (root) => {
     assert.equal(run(root, "--help").status, 0);
-    assert.match(run(root, "--version").stdout, /0\.5\.0/);
+    assert.equal(run(root, "--version").stdout.trim(), tool.version);
     assert.equal(run(root, "init").status, 0);
     assert.equal(run(root, "init").status, 2);
     await writeFile(

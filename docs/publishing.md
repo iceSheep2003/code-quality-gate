@@ -5,7 +5,7 @@
 Code Quality Gate is a Node CLI with a `bin` entry. Publish it to npm once and users can install it or execute it through npx. npx is an npm package runner, not a separate registry.
 
 ```sh
-npm install --save-dev code-quality-gate@0.5.0
+npm install --save-dev code-quality-gate@0.5.1
 npx code-quality-gate setup
 npx code-quality-gate audit
 ```
@@ -13,7 +13,7 @@ npx code-quality-gate audit
 For a one-off execution after publication:
 
 ```sh
-npx --yes code-quality-gate@0.5.0 audit --root /path/to/project
+npx --yes code-quality-gate@0.5.1 audit --root /path/to/project
 ```
 
 The package is currently prepared for publication. npm commands above become available after an actual successful registry publish; an available name is not a reservation. `code-quality` remains an executable alias for earlier local consumers.
@@ -50,13 +50,13 @@ The repository is public. The workflow publishes with provenance so consumers ca
 Authenticated users can install the tagged source before npm publication:
 
 ```sh
-npm install --save-dev github:iceSheep2003/code-quality-gate#v0.5.0
+npm install --save-dev github:iceSheep2003/code-quality-gate#v0.5.1
 ```
 
-The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
+The generated host-project CI template installs the matching tagged GitHub source and does not require an npm release. The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
 
 ```sh
-npm install --save-dev ./code-quality-gate-0.5.0.tgz
+npm install --save-dev ./code-quality-gate-0.5.1.tgz
 ```
 
 ## pip / pipx / uv

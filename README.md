@@ -20,17 +20,17 @@ The package coordinates tests and tools. The connected coding agent writes and r
 
 Requires **Node.js 22.13+**, plus the toolchain used by the project being tested.
 
-Version 0.5.0 is prepared for npm publication. Until it is published, install the tagged GitHub source or a release tarball; the repository is public:
+Version 0.5.1 is prepared for npm publication. Until it is published, install the tagged GitHub source or a release tarball; the repository is public:
 
 ```sh
-npm install --save-dev github:iceSheep2003/code-quality-gate#v0.5.0
+npm install --save-dev github:iceSheep2003/code-quality-gate#v0.5.1
 npx --no-install code-quality-gate setup
 ```
 
 After the npm release is published, the equivalent installation is:
 
 ```sh
-npm install --save-dev code-quality-gate@0.5.0
+npm install --save-dev code-quality-gate@0.5.1
 npx code-quality-gate setup
 ```
 
@@ -47,7 +47,7 @@ npx code-quality-gate setup
 
 Then ask the agent to implement a feature. It can configure the language tools, write acceptance tests and follow the packaged skill. Clients that do not read project instructions or `.mcp.json` need the one-time integration described below. Installation does not silently run project code or modify a repository through npm lifecycle hooks.
 
-The generated CI workflow uses the npm release. Publish that release before enabling the workflow. Project-specific dependency installation belongs in `.code-quality-gate/ci-setup.sh`, which the agent can prepare.
+The generated CI workflow installs the matching tagged GitHub version, so it also works before npm publication. Project-specific dependency installation belongs in `.code-quality-gate/ci-setup.sh`, which the agent can prepare.
 
 ## Agent integration
 
