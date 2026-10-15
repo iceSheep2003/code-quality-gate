@@ -1,5 +1,5 @@
 {
-  "name": "cqg",
+  "name": "code-quality-gate",
   "version": "0.7.0",
   "description": "Test-first quality gates for AI coding agents, with language-independent checks and offline HTML reports",
   "type": "module",

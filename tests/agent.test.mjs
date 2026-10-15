@@ -10,6 +10,7 @@ import {
   runGate,
   validateTask,
 } from "../src/index.mjs";
+import { tool } from "../src/version.mjs";
 import { withWorkflowLock } from "../src/agent/lock.mjs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -165,6 +166,16 @@ test("setup preserves user instructions/configuration and installs idempotent sk
       }),
     );
     assert.equal((await setupAgent(root)).passed, true);
+    const workflow = await readFile(
+      join(root, ".github/workflows/code-quality-gate.yml"),
+      "utf8",
+    );
+    assert.ok(
+      workflow.includes(
+        `npm install --global --ignore-scripts ${tool.name}@${tool.version}`,
+      ),
+    );
+    assert.match(workflow, /run: cqg gate/);
     const first = await readFile(join(root, "AGENTS.md"), "utf8");
     await setupAgent(root);
     assert.equal(await readFile(join(root, "AGENTS.md"), "utf8"), first);

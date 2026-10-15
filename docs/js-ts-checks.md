@@ -2,14 +2,14 @@
 
 ## 内置 JS/TS 静态检查
 
-拿到交付的 `cqg-0.7.0.tgz` 后，在需要检查的项目根目录执行：
+在需要检查的项目根目录安装：
 
 ```sh
-npm install --save-dev /实际路径/cqg-0.7.0.tgz
+npm install --save-dev code-quality-gate@0.7.0
 npx --no-install cqg check
 ```
 
-安装包本身不需要 MindLeap 源码、服务端、数据库、API 密钥或联网账户。首次安装会下载 npm 依赖；安装完成后检查可以离线运行。没有发布到 npm，不要把名称当成已存在的公共注册表包。
+安装包本身不需要 MindLeap 源码、服务端、数据库、API 密钥或联网账户。首次安装会下载 npm 依赖；安装完成后检查可以离线运行。npm 包名为 `code-quality-gate`，可执行命令为 `cqg`。
 
 零配置默认检查项目中的支持语言，排除依赖、构建产物、覆盖率、声明文件、`tests/`、`test/` 和 `*.test.*` / `*.spec.*`。非支持语言不会被分析；没有任何支持的源文件会失败。
 
@@ -123,7 +123,7 @@ npx --no-install cqg check
 ## 编程接口
 
 ```js
-import { analyzeSource, evaluateReport, checkProject, resolveConfig, toSarif } from 'cqg';
+import { analyzeSource, evaluateReport, checkProject, resolveConfig, toSarif } from 'code-quality-gate';
 const source = analyzeSource('export const sum=(a:number,b:number)=>a+b;', { filename:'src/sum.ts' });
 console.log(evaluateReport([source]));
 const project = await checkProject(process.cwd(), resolveConfig({ include:['src'] }));
