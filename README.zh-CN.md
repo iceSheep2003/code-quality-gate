@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="assets/logo.svg" width="88" height="88" alt="Code Quality Gate 标识">
+  <img src="https://raw.githubusercontent.com/iceSheep2003/code-quality-gate/main/assets/logo.svg" width="88" height="88" alt="Code Quality Gate 标识">
 </p>
 <h1 align="center">Code Quality Gate</h1>
 <p align="center"><strong>先写测试，逐轮记录，达标后再合并。</strong></p>
-<p align="center"><a href="README.md">English</a> · 简体中文</p>
+<p align="center"><a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/README.md">English</a> · 简体中文</p>
 <p align="center">
   <a href="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml"><img src="https://github.com/iceSheep2003/code-quality-gate/actions/workflows/ci.yml/badge.svg" alt="跨平台检查"></a>
   <a href="https://github.com/iceSheep2003/code-quality-gate/releases"><img src="https://img.shields.io/github/v/release/iceSheep2003/code-quality-gate" alt="GitHub 版本"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT 许可证"></a>
+  <a href="https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT 许可证"></a>
   <img src="https://img.shields.io/badge/node-%E2%89%A522.13-339933" alt="需要 Node.js 22.13 或更新版本">
 </p>
 
@@ -15,14 +15,14 @@ Code Quality Gate 为 AI 编程提供一套测试先行的验收流程：AI 先�
 
 安装包叫 **`code-quality-gate`**，命令统一叫 **`cqg`**。它调用项目自己的工具，被检查的代码可以使用任何语言。
 
-[安装](#安装) · [命令](#命令) · [接入-ai](#接入-ai) · [累计报告](#累计报告) · [配置参考](docs/adapters.md)
+[安装](#安装) · [命令](#命令) · [接入-ai](#接入-ai) · [累计报告](#累计报告) · [配置参考](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)
 
 ## 安装
 
-需要 **Node.js 22.13+**，以及被测项目所需的语言工具链。安装公有 GitHub 版本后，在项目目录接入：
+需要 **Node.js 22.13+**，以及被测项目所需的语言工具链。从 npm 安装后，在项目目录接入：
 
 ```sh
-npm install -g github:iceSheep2003/code-quality-gate#v0.6.0
+npm install -g code-quality-gate
 cd your-project
 cqg setup
 ```
@@ -33,13 +33,21 @@ cqg setup
 <summary>只在当前项目安装</summary>
 
 ```sh
-npm install -D github:iceSheep2003/code-quality-gate#v0.6.0
+npm install -D code-quality-gate
 npx --no-install cqg setup
 ```
 
-本地安装后，其他命令也加上 `npx --no-install` 前缀。包尚未发布到 npm 官方仓库，目前可使用 GitHub 源码或 [Release 安装包](https://github.com/iceSheep2003/code-quality-gate/releases)。npm 发布方式见[分发说明](docs/publishing.md)。
+本地安装后，其他命令也加上 `npx --no-install` 前缀。包名为 `code-quality-gate`，`cqg` 是它提供的命令。[GitHub 源码和 Release 安装包](https://github.com/iceSheep2003/code-quality-gate/releases)也可安装。版本固定与发布方式见[分发说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/publishing.md)。
 
 </details>
+
+不做全局安装，也可以在项目目录直接运行：
+
+```sh
+npx code-quality-gate setup
+```
+
+npx 使用包名；`npx cqg` 会查找另一个同名包。
 
 ## 命令
 
@@ -85,7 +93,7 @@ cqg mcp
 
 MCP 提供 status、setup、begin、red、green、audit 和 gate 工具，名称前缀为 `code_quality_gate_`。只有最终门禁通过才返回 `canMerge: true`。MCP 的标准输出专用于协议通信。编程 AI 负责修改实现，本包负责工作流与检测记录。
 
-完整规则见[内置 Skill](skills/code-quality-gate/SKILL.md)和[任务与配置说明](docs/adapters.md)。
+完整规则见[内置 Skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md)和[任务与配置说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)。
 
 ## 使用项目自己的检测工具
 
@@ -115,7 +123,7 @@ MCP 提供 status、setup、begin、red、green、audit 和 gate 工具，名称
 
 命令在项目根目录运行，不经过 shell。JSON、JUnit 和 LCOV 支持数值门槛；命令或文本检查依赖退出码判定。缺失指标、旧报告、格式错误、工具崩溃或超时都不能通过。记录 red 必须有真实断言失败；原本就通过的测试、跳过项和已知加载错误不能作为失败证据。
 
-覆盖率和变异得分来自实际工具，各项指标独立记录。覆盖率不能证明业务正确，本包也不会把不同指标拼成虚构的综合等级。详见[工具适配](docs/adapters.md)、[Python 示例](examples/python)和 [JS/TS 静态检查](docs/js-ts-checks.md)。
+覆盖率和变异得分来自实际工具，各项指标独立记录。覆盖率不能证明业务正确，本包也不会把不同指标拼成虚构的综合等级。详见[工具适配](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/adapters.md)、[Python 示例](https://github.com/iceSheep2003/code-quality-gate/tree/main/examples/python)和 [JS/TS 静态检查](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/js-ts-checks.md)。
 
 ## 累计报告
 
@@ -129,7 +137,7 @@ cqg audit -f sarif > quality-report.sarif
 
 默认记录所有门槛指标、JUnit 测试数量与结果、LCOV 覆盖率。通过 `audit.history.metrics` 选择展示列，也可以加入项目工具提供的变异得分和复杂度。缺失、错误、未运行和真实的零值会分别表示。AI 写修改说明，检测工具提供数值。
 
-[真实 Python 检测记录](https://github.com/iceSheep2003/code-quality-gate/releases/download/v0.6.0/code-quality-gate-history.md)展示了“覆盖率 100% 但仍有 2 项测试失败”，以及修复边界条件后失败数归零的过程。全部记录字段见[历史说明](docs/history.md)。逐轮详细报告、`latest.md` 和 `latest.json` 保存在历史记录旁。
+[真实 Python 检测记录](https://github.com/iceSheep2003/code-quality-gate/releases/download/v0.6.0/code-quality-gate-history.md)展示了“覆盖率 100% 但仍有 2 项测试失败”，以及修复边界条件后失败数归零的过程。全部记录字段见[历史说明](https://github.com/iceSheep2003/code-quality-gate/blob/main/docs/history.md)。逐轮详细报告、`latest.md` 和 `latest.json` 保存在历史记录旁。
 
 ## 合并前执行门禁
 
@@ -153,4 +161,4 @@ npm pack
 
 ## 许可证
 
-[MIT](LICENSE)。依赖保留各自许可证，详见[第三方声明](THIRD_PARTY_NOTICES.md)。
+[MIT](https://github.com/iceSheep2003/code-quality-gate/blob/main/LICENSE)。依赖保留各自许可证，详见[第三方声明](https://github.com/iceSheep2003/code-quality-gate/blob/main/THIRD_PARTY_NOTICES.md)。

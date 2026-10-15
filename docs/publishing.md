@@ -5,7 +5,7 @@
 Code Quality Gate is a Node CLI with a `bin` entry. Publish it to npm once and users can install it or execute it through npx. npx is an npm package runner, not a separate registry.
 
 ```sh
-npm install --save-dev code-quality-gate@0.6.0
+npm install --save-dev code-quality-gate@0.6.1
 npx --no-install cqg setup
 npx --no-install cqg audit
 ```
@@ -13,14 +13,14 @@ npx --no-install cqg audit
 For a one-off execution after publication:
 
 ```sh
-npm exec --yes --package=code-quality-gate@0.6.0 -- cqg audit
+npm exec --yes --package=code-quality-gate@0.6.1 -- cqg audit
 ```
 
-The package is currently prepared for publication. npm commands above become available after an actual successful registry publish; an available name is not a reservation. `cqg` is the primary executable. `code-quality-gate` and `code-quality` remain executable aliases for compatibility. For local installations use `npx --no-install cqg` to avoid downloading an unrelated registry package named cqg.
+The public package is [code-quality-gate](https://www.npmjs.com/package/code-quality-gate). `cqg` is the primary executable. `code-quality-gate` and `code-quality` remain executable aliases for compatibility. For local installations use `npx --no-install cqg` to avoid downloading an unrelated registry package named cqg.
 
 ## First publication
 
-The publisher needs an npm account with email verification, package-publishing permissions and the authentication required by npm. Run these commands locally:
+The publisher needs an npm account with a verified email, publishing permissions and two-factor authentication enabled. Complete account and publishing challenges on npm's official pages; keep credentials and recovery codes outside the repository. Run these commands locally:
 
 ```sh
 npm login
@@ -47,16 +47,16 @@ The repository is public. The workflow publishes with provenance so consumers ca
 
 ## GitHub source and release archives
 
-Anyone can install the public tagged source before npm publication:
+The public tagged source is an alternative to the npm registry:
 
 ```sh
-npm install --save-dev github:iceSheep2003/code-quality-gate#v0.6.0
+npm install --save-dev github:iceSheep2003/code-quality-gate#v0.6.1
 ```
 
-The generated host-project CI template installs the matching tagged GitHub source and does not require an npm release. The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
+The generated host-project CI template installs the matching tagged GitHub source. The repository is public. A `.tgz` generated with `npm pack` can also be installed directly:
 
 ```sh
-npm install --save-dev ./code-quality-gate-0.6.0.tgz
+npm install --save-dev ./code-quality-gate-0.6.1.tgz
 ```
 
 ## pip / pipx / uv
