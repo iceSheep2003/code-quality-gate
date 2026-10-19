@@ -27,3 +27,5 @@ export { validateTask } from "./agent/contract.mjs";
 export { runProjectAudit } from "./audit/project-audit.mjs";
 export { recordHistory } from "./audit/history.mjs";
 export { reportHtml } from "./html/report.mjs";
+
+export { inspectTestPlan } from "./agent/plan.mjs";

@@ -1,5 +1,4 @@
-import { historySpecification } from "../audit/history-metrics.mjs";
-import { runAudit } from "../audit/engine.mjs";
+import { executionPlan, runPlannedAudit } from "./test-plan.mjs";
 import { readConfig } from "../project.mjs";
 import { hash } from "../ast.mjs";
 import { readJson, writeJson } from "../files.mjs";
@@ -7,16 +6,6 @@ import { loadTask, recordPath, snapshot, sameProtection } from "./contract.mjs";
 import { rejected, saveIteration } from "./artifacts.mjs";
 import { withWorkflowLock } from "./lock.mjs";
 
-function acceptanceChecks(task, config) {
-  return task.testChecks.map((id) => {
-    const check = config.audit?.checks?.find((item) => item.id === id);
-    if (!check || check.required === false || check.format !== "junit")
-      throw new Error(
-        `Acceptance check ${id} must be required and produce JUnit`,
-      );
-    return check;
-  });
-}
 function redMetrics(metrics) {
   return (
     metrics.assertionFailures > 0 &&
@@ -40,7 +29,7 @@ function isRealRed(audit) {
 async function context(root, manifest, filename) {
   const task = await loadTask(root, manifest);
   const config = await readConfig(root, filename);
-  acceptanceChecks(task, config);
+  executionPlan(task, config, "green");
   const options = { manifest, config: filename };
   const current = await snapshot(root, task, options);
   const evidence = await readJson(root, recordPath(task.id), {
@@ -57,12 +46,7 @@ async function red(root, ctx) {
       "red",
       "Red evidence already exists; preserve the original tests and continue green",
     );
-  const audit = await runAudit(root, {
-    ...config.audit,
-    checks: acceptanceChecks(task, config),
-    history: undefined,
-  });
-  audit.history = historySpecification(config.audit);
+  const audit = await runPlannedAudit(root, task, config, "red");
   const after = await snapshot(root, task, options);
   const accepted = isRealRed(audit) && hash(current) === hash(after);
   const result = await saveIteration(root, task, {
@@ -118,7 +102,7 @@ async function green(root, ctx) {
   const next = { ...evidence, attempts: evidence.attempts + 1 };
   delete next.green;
   await writeJson(root, recordPath(task.id), next);
-  const audit = await runAudit(root, config.audit);
+  const audit = await runPlannedAudit(root, task, config, "green");
   const after = await snapshot(root, task, options);
   const accepted =
     audit.passed &&
@@ -130,8 +114,8 @@ async function green(root, ctx) {
     audit: audit,
     accepted: accepted,
     message: accepted
-      ? "All required checks passed; run the final gate before merging"
-      : "Implementation must change from red, pass all checks, and remain unchanged while checks run",
+      ? "All required iteration checks passed; run the full final gate before merging"
+      : "Implementation must change from red, pass iteration checks, and remain unchanged while checks run",
   });
   if (accepted)
     await writeJson(root, recordPath(task.id), {
@@ -194,7 +178,7 @@ async function executeGate({ root, manifest, config, note }) {
       "gate",
       "Code, tests or quality standards changed after green; rerun the workflow",
     );
-  const audit = await runAudit(root, ctx.config.audit);
+  const audit = await runPlannedAudit(root, task, ctx.config, "gate");
   const after = await snapshot(root, task, options);
   const accepted = audit.passed && hash(current) === hash(after);
   return saveIteration(root, task, {
@@ -208,7 +192,7 @@ async function executeGate({ root, manifest, config, note }) {
   });
 }
 
-async function activeTask(root, manifest, config) {
+export async function activeTask(root, manifest, config) {
   if (manifest) return { manifest, config: config || "quality.config.json" };
   const active = await readJson(root, ".code-quality-gate/active.json", {
     optional: true,

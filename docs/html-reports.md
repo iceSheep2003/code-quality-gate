@@ -22,6 +22,8 @@ Charts group by task and use recorded sequence numbers on the horizontal axis. L
 
 The report currently shows aggregate metrics and check diagnostics. It does not add JaCoCo-style source-line coverage or individual test-case drilldowns: the existing input adapters summarize JUnit and LCOV. Source-level views would require preserving that detail from a detector.
 
+The iteration table also shows each task phase’s test plan, executed check IDs and deferred IDs. Focused green is not a full-suite pass. Deferred metrics remain `not-run`; the final gate executes all configured checks. See [test plans](test-plans.md).
+
 ## CLI and API
 
 ```sh

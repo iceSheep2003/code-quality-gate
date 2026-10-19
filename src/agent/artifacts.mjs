@@ -17,8 +17,13 @@ export function failedAudit(rule, message) {
     summary: { total: 1, passed: 0, failed: 1, errors: 0, blocking: 1 },
   };
 }
+function executionText(audit) {
+  const plan = audit.execution;
+  if (!plan) return "";
+  return `**Execution scope:** ${plan.mode}\n\n**Executed checks:** ${plan.selectedChecks.join(", ")}\n\n**Deferred to final gate:** ${plan.deferredChecks.join(", ") || "none"}\n\n`;
+}
 export function workflowMarkdown(result) {
-  return `# Code Quality Gate workflow\n\n**Phase:** ${result.phase}\n\n**Phase accepted:** ${result.passed ? "yes" : "no"}\n\n**Ready to merge:** ${result.canMerge ? "yes" : "no"}\n\n${result.message}\n\n**Iteration history:** ${result.history?.markdown || "not recorded"}\n\n${auditMarkdown(result.audit)}`;
+  return `# Code Quality Gate workflow\n\n**Phase:** ${result.phase}\n\n**Phase accepted:** ${result.passed ? "yes" : "no"}\n\n**Ready to merge:** ${result.canMerge ? "yes" : "no"}\n\n${result.message}\n\n**Iteration history:** ${result.history?.markdown || "not recorded"}\n\n${executionText(result.audit)}${auditMarkdown(result.audit)}`;
 }
 export async function saveIteration(
   root,

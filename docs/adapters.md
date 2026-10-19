@@ -98,6 +98,8 @@ Paths must be explicit files inside the project, without globs. Every test check
 
 The JUnit parser exposes `assertionFailures`, `errors` and `loadingErrors` in addition to `failures` (which still includes errors). A red phase requires failed acceptance checks with nonzero exit codes, failing assertions, positive test counts, no skips/errors, and no known loading-failure signatures. This relies on the runner correctly classifying JUnit failures; it is not universal semantic exception analysis.
 
-The CLI saves both the expected red audit failure and whether it qualified as workflow evidence. Green runs every configured audit check, consumes an attempt and requires changed implementation, frozen acceptance inputs, and stable files during execution. The final gate reruns the suite; a stored green result alone does not grant readiness.
+The CLI saves both the expected red audit failure and whether it qualified as workflow evidence. Green runs the frozen testPlan.iterationChecks (or every configured check when absent), consumes an attempt and requires changed implementation, frozen acceptance inputs, and stable files during execution. The final gate always reruns all configured checks; a stored green result alone does not grant readiness.
 
 `.code-quality-gate/active.json` selects the task verified by the default final gate. Older task evidence is retained as history; it is not all revalidated against code changed by later tasks. Repository policy and trusted CI determine how task scope and historical evidence are reviewed.
+
+Optional focused iteration checks and full-gate behavior are documented in [test plans](test-plans.md).

@@ -46,9 +46,22 @@ cqg green -n "Handle empty input"
 cqg gate
 ```
 
-`red` requires failing assertions in a JUnit acceptance report. Loading errors, skipped tests and an already-passing suite do not qualify. After red, tests, requirements, adapters and thresholds are frozen for that task. `green` runs all configured checks and records the attempt; the default budget is 12 attempts. `gate` reruns the checks and rejects implementation changes made after the accepted green result.
+`red` requires failing assertions in a JUnit acceptance report. Loading errors, skipped tests and an already-passing suite do not qualify. After red, tests, requirements, adapters and thresholds are frozen for that task. `green` runs the task’s planned iteration checks (all checks when no plan is set) and records the attempt; the default budget is 12 attempts. `gate` reruns the checks and rejects implementation changes made after the accepted green result.
 
 The agent writes and revises the code. `cqg` executes checks and returns evidence and failures for the next iteration. It does not start an AI agent by itself. See the [workflow skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md) for the full procedure.
+
+## Run the right tests per iteration
+
+Add a `testPlan` to the task before recording red:
+
+```json
+"testPlan": {
+  "iterationChecks": ["acceptance", "lint"],
+  "rationale": "Run changed behavior and lint per edit; defer full regression, coverage and mutation to the final gate."
+}
+```
+
+`cqg plan FEATURE-001` previews the selection without executing checks. Every acceptance check must remain in the iteration set. `green` uses that set; `gate` always runs all configured checks. Reports list executed and deferred checks, and deferred metrics remain `not-run`. The plan freezes with the task at red. [Test plan reference](docs/test-plans.md).
 
 ## Choose the quality requirements
 
@@ -88,6 +101,7 @@ Markdown summaries and a JSONL history are saved alongside the HTML. The report 
 | `cqg setup` | Connect the project to a coding agent |
 | `cqg mcp` | Start the MCP server in the current project |
 | `cqg red <task>` / `cqg green` / `cqg gate` | Record and verify the test-first cycle |
+| `cqg plan [task]` | Preview the test plan without executing checks |
 | `cqg status` | Inspect the active task |
 | `cqg audit` | Run configured checks without TDD evidence |
 | `cqg check` | Run built-in JS/TS static checks |
