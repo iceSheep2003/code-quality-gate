@@ -19,12 +19,17 @@ function source(entry) {
     : value.changedFiles?.join(", ") || "none";
   return `<code title="${escape(fingerprint)}">${escape(fingerprint.slice(0, 12))}</code><small>${escape(files)}</small>`;
 }
+function execution(entry) {
+  const plan = entry.audit?.execution;
+  if (!plan) return "—";
+  return `${escape(plan.mode)}<small>${text("Executed", "已执行")}: ${escape(plan.selectedChecks.join(", "))}</small><small>${text("Deferred", "延期")}: ${escape(plan.deferredChecks.join(", ") || "—")}</small>`;
+}
 export function iterations(entries) {
   const rows = [...entries]
     .reverse()
     .map(
       (entry) =>
-        `<tr ${rowData(entry)} data-sequence="${entry.sequence}"><td class="mono">#${entry.sequence}</td><td><strong>${escape(entry.task.id)}</strong><small>${escape(entry.timestamp)}</small></td><td>${escape(entry.phase.toUpperCase())}</td><td>${badge(entry.accepted ? "accepted" : "failed")}<small>${escape(decision(entry))}</small></td><td>${source(entry)}</td><td>${escape(entry.note || entry.message)}</td></tr>`,
+        `<tr ${rowData(entry)} data-sequence="${entry.sequence}"><td class="mono">#${entry.sequence}</td><td><strong>${escape(entry.task.id)}</strong><small>${escape(entry.timestamp)}</small></td><td>${escape(entry.phase.toUpperCase())}</td><td>${badge(entry.accepted ? "accepted" : "failed")}<small>${escape(decision(entry))}</small></td><td>${execution(entry)}</td><td>${source(entry)}</td><td>${escape(entry.note || entry.message)}</td></tr>`,
     )
     .join("");
   return table(
@@ -33,6 +38,7 @@ export function iterations(entries) {
       ["Task / UTC", "任务 / UTC 时间"],
       ["Phase", "阶段"],
       ["Decision", "判定"],
+      ["Test plan", "测试方案"],
       ["Code / changed files", "代码 / 修改文件"],
       ["Change note", "修改说明"],
     ],

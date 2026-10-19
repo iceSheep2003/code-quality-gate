@@ -62,6 +62,13 @@ function checkFacts(audit) {
       .join("; "),
   }));
 }
+function auditFacts(audit) {
+  return {
+    startedAt: audit.startedAt || null,
+    execution: audit.execution || null,
+    summary: audit.summary || {},
+  };
+}
 async function makeEntry(root, input, entries) {
   const sameTask = entries.filter((entry) => entry.task.id === input.task.id);
   const measurement = measuredMetrics(input.audit);
@@ -83,10 +90,7 @@ async function makeEntry(root, input, entries) {
     metrics: measurement.metrics,
     displayMetrics: measurement.display,
     checks: checkFacts(input.audit),
-    audit: {
-      startedAt: input.audit.startedAt || null,
-      summary: input.audit.summary || {},
-    },
+    audit: auditFacts(input.audit),
     previousHash: entries.at(-1)?.recordHash || null,
   };
   return { ...value, recordHash: hash(value) };

@@ -1,3 +1,4 @@
+import { inspectTestPlan } from "./plan.mjs";
 import { tool } from "../version.mjs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -59,12 +60,19 @@ const taskSchema = {
   codeFiles: z.array(z.string()).min(1),
   testChecks: z.array(z.string()).min(1),
   protectedFiles: z.array(z.string()).optional(),
+  testPlan: z
+    .object({
+      iterationChecks: z.array(z.string()).min(1),
+      rationale: z.string().min(1).max(2000),
+    })
+    .strict()
+    .optional(),
   maxAttempts: z.number().int().min(1).max(100).optional(),
 };
 export function createMcpServer(root) {
   const server = new McpServer(tool, {
     instructions:
-      "For code changes: inspect quality checks, write acceptance tests first, begin a task, record real failing assertions with code_quality_gate_red, implement and repeat code_quality_gate_green using its reports, then call code_quality_gate_gate before an authorized merge. Do not weaken tests, quality standards or evidence. Respect the user scope, stop requests and task budget. This server runs configured project tools and is not a sandbox.",
+      "For code changes: inspect quality checks, design a task testPlan selecting focused iteration checks and deferring expensive checks to the full gate, write acceptance tests first, begin a task, record real failing assertions with code_quality_gate_red, implement and repeat code_quality_gate_green using its reports, then call code_quality_gate_gate before an authorized merge. Do not weaken tests, quality standards or evidence. Respect the user scope, stop requests and task budget. This server runs configured project tools and is not a sandbox.",
   });
   register(
     server,
@@ -94,6 +102,20 @@ export function createMcpServer(root) {
       schema: taskSchema,
     },
     (args) => withWorkflowLock(root, () => beginTask(root, args)),
+  );
+  register(
+    server,
+    {
+      name: "code_quality_gate_plan",
+      description:
+        "Preview acceptance, iteration and full-gate check selection without executing tools",
+      readOnly: true,
+      schema: {
+        manifest: z.string().optional(),
+        config: z.string().optional(),
+      },
+    },
+    (args) => inspectTestPlan({ root, ...args }),
   );
   registerPhases(server, root);
   register(
@@ -133,7 +155,7 @@ function registerPhases(server, root) {
         description:
           phase === "red"
             ? "Record failing acceptance assertions before implementing; freezing tests and quality standards"
-            : "Audit the implementation without changing frozen tests or standards; repeat using the generated report until passed or budget exhausted",
+            : "Run the frozen iteration test plan without changing tests or standards; repeat using the generated report until passed or budget exhausted",
         schema: { manifest: z.string(), note: z.string().max(1000).optional() },
       },
       (args) =>

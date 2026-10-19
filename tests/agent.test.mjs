@@ -408,6 +408,22 @@ test("MCP stdio provides real discovery and the complete red/green/gate workflow
         (await call("code_quality_gate_status")).configuredChecks.length,
         1,
       );
+      const { version, ...declaration } = task;
+      const begun = await call("code_quality_gate_begin", {
+        ...declaration,
+        id: "PLANNED",
+        testPlan: {
+          iterationChecks: ["acceptance"],
+          rationale: "Focused task acceptance, full gate at completion",
+        },
+      });
+      assert.equal(begun.passed, true);
+      const plan = await call("code_quality_gate_plan", {
+        manifest: begun.manifest,
+      });
+      assert.deepEqual(plan.phases[1].selectedChecks, ["acceptance"]);
+      assert.equal(plan.canMerge, false);
+      assert.deepEqual(plan.testPlan.iterationChecks, ["acceptance"]);
       assert.equal(
         (await call("code_quality_gate_red", { manifest })).passed,
         true,

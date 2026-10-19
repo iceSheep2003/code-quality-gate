@@ -63,7 +63,11 @@ async function init(root, opts) {
 }
 async function dispatch(opts) {
   const root = resolve(opts.root);
-  if (["setup", "workflow", "gate", "status", "mcp"].includes(opts.command))
+  if (
+    ["setup", "workflow", "gate", "status", "plan", "mcp"].includes(
+      opts.command,
+    )
+  )
     return dispatchAgent(root, opts);
   if (opts.command === "check")
     return checkProject(root, await loadConfig(root, opts));

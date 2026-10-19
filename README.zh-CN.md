@@ -46,9 +46,22 @@ cqg green -n "处理空输入"
 cqg gate
 ```
 
-`red` 要求 JUnit 验收报告中存在断言失败。加载错误、跳过测试或原本就通过的测试不能作为 red 证据。记录 red 后，该任务的测试、需求、适配器和门槛会被冻结。`green` 执行所有已配置的检查并记录本轮结果，默认最多尝试 12 次。`gate` 重新运行检查；通过 green 后再次修改实现，会使原先的结果失效。
+`red` 要求 JUnit 验收报告中存在断言失败。加载错误、跳过测试或原本就通过的测试不能作为 red 证据。记录 red 后，该任务的测试、需求、适配器和门槛会被冻结。`green` 执行方案中的迭代检查并记录本轮结果；未配置方案时执行全部检查，默认最多尝试 12 次。`gate` 重新运行检查；通过 green 后再次修改实现，会使原先的结果失效。
 
 AI 负责写代码和修改代码，`cqg` 负责执行检查、返回证据和失败原因。这个包本身不会启动 AI。完整流程见[工作流 skill](https://github.com/iceSheep2003/code-quality-gate/blob/main/skills/code-quality-gate/SKILL.md)。
+
+## 按测试方案执行
+
+记录 red 之前，在任务中加入 `testPlan`：
+
+```json
+"testPlan": {
+  "iterationChecks": ["acceptance", "lint"],
+  "rationale": "每轮验证本次改动和 lint；全量回归、覆盖率及变异测试留到最终门禁。"
+}
+```
+
+`cqg plan FEATURE-001` 可以预览方案，不执行检查。每轮检查必须包含该任务的全部验收检查。`green` 按方案执行，`gate` 始终执行所有已配置的检查。报告会列出已执行和延期项，延期指标显示为 `not-run`。方案在 red 后冻结。详见[测试方案说明](docs/test-plans.md)。
 
 ## 设置质量要求
 
@@ -88,6 +101,7 @@ HTML 旁边还会保存 Markdown 摘要和 JSONL 历史。目前报告展示汇�
 | `cqg setup` | 将项目接入编程 AI |
 | `cqg mcp` | 为当前项目启动 MCP 服务 |
 | `cqg red <task>` / `cqg green` / `cqg gate` | 记录并验证测试优先流程 |
+| `cqg plan [task]` | 预览测试方案，不执行检查 |
 | `cqg status` | 查看当前任务 |
 | `cqg audit` | 运行已配置的检查，不建立 TDD 证据 |
 | `cqg check` | 运行内置 JS/TS 静态检查 |

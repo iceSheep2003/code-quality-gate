@@ -6,6 +6,7 @@ Agent workflow
   cqg red <task>           Record failing acceptance tests
   cqg green [task]         Check the implementation (default: active task)
   cqg gate [task]          Run the final gate before merging
+  cqg plan [task]          Preview the frozen test plan without running checks
   cqg status               Show workflow status
   cqg audit                Run configured tools and save reports/history
 
@@ -44,6 +45,7 @@ const commandFlags = {
   workflow: [...workflowFlags, "phase"],
   gate: workflowFlags,
   status: ["root", "format"],
+  plan: ["root", "config", "manifest", "format"],
   mcp: ["root"],
   check: ["root", "config", "format"],
   audit: ["root", "config", "format", "note"],
@@ -93,7 +95,7 @@ function parseFlag(argv, index, result, given) {
 }
 function positional(result, value, given) {
   const key = result.command === "mcp" ? "root" : "manifest";
-  if (!["mcp", "red", "green", "gate"].includes(result.command))
+  if (!["mcp", "red", "green", "gate", "plan"].includes(result.command))
     throw new Error("Unexpected CLI argument: " + value);
   if (given.includes(key)) throw new Error(key + " was specified twice");
   result[key] =

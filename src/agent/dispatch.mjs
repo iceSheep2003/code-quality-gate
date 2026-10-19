@@ -1,8 +1,15 @@
+import { inspectTestPlan } from "./plan.mjs";
 import { setupAgent } from "./setup.mjs";
 import { runWorkflow, runGate } from "./workflow.mjs";
 import { agentStatus } from "./status.mjs";
 export async function dispatchAgent(root, opts) {
   if (opts.command === "setup") return setupAgent(root);
+  if (opts.command === "plan")
+    return inspectTestPlan({
+      root,
+      manifest: opts.manifest,
+      config: opts.config,
+    });
   if (opts.command === "status") return agentStatus(root);
   if (opts.command === "workflow")
     return runWorkflow({

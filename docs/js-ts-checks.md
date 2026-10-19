@@ -5,7 +5,7 @@
 在需要检查的项目根目录安装：
 
 ```sh
-npm install --save-dev code-quality-gate@0.7.0
+npm install --save-dev code-quality-gate@0.8.0
 npx --no-install cqg check
 ```
 

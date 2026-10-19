@@ -1,4 +1,5 @@
 import { readJson, readSource, safeRelative } from "../files.mjs";
+import { validateTestPlan } from "./test-plan.mjs";
 import { hash } from "../ast.mjs";
 
 function paths(value, name, allowEmpty = false) {
@@ -21,6 +22,7 @@ export function validateTask(input) {
     "testChecks",
     "protectedFiles",
     "maxAttempts",
+    "testPlan",
   ];
   if (
     !input ||
@@ -51,6 +53,7 @@ function normalizeTask(input) {
     testChecks.some((id) => typeof id !== "string" || !id.trim())
   )
     throw new Error("testChecks must identify acceptance checks");
+  validateTestPlan(input.testPlan, testChecks);
   const maxAttempts = input.maxAttempts ?? 12;
   if (!Number.isInteger(maxAttempts) || maxAttempts < 1 || maxAttempts > 100)
     throw new Error("maxAttempts must be 1..100");

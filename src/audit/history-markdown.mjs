@@ -42,12 +42,17 @@ function columns(entries) {
     for (const metric of entry.metrics) all.set(metricKey(metric), metric);
   return [...all.values()].slice(0, 32);
 }
+function executionText(entry) {
+  const plan = entry.audit?.execution;
+  if (!plan) return "—";
+  return `${plan.mode}: ${plan.selectedChecks.join(", ")}; deferred: ${plan.deferredChecks.join(", ") || "none"}`;
+}
 function iterationRows(entries) {
   return entries.map((entry) => {
     const changes = entry.source.baseline
       ? "baseline"
       : entry.source.changedFiles.join(", ") || "none";
-    return `| ${entry.sequence} | ${cell(entry.timestamp)} | ${cell(entry.task.id)} | ${cell(entry.phase)} | ${cell(sourceText(entry))} | ${cell(changes)} | ${decision(entry)} | ${cell(entry.note || entry.message)} |`;
+    return `| ${entry.sequence} | ${cell(entry.timestamp)} | ${cell(entry.task.id)} | ${cell(entry.phase)} | ${cell(sourceText(entry))} | ${cell(changes)} | ${decision(entry)} | ${cell(executionText(entry))} | ${cell(entry.note || entry.message)} |`;
   });
 }
 function metricTable(entries) {
@@ -80,8 +85,8 @@ export function historyMarkdown(entries) {
     "",
     "## Iterations",
     "",
-    "| # | Time (UTC) | Task | Phase | Code fingerprint | Changed files since prior task iteration | Decision | Note |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| # | Time (UTC) | Task | Phase | Code fingerprint | Changed files since prior task iteration | Decision | Test plan | Note |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...iterationRows(entries),
     "",
     "## Metric history",
